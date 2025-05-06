@@ -182,9 +182,7 @@ Data Preparation dilakukan untuk memastikan bahwa data yang digunakan dalam pemo
    **Langkah yang Diambil**:
    Normalisasi dilakukan menggunakan **StandardScaler**, yaitu metode standardisasi yang mengubah distribusi setiap fitur menjadi memiliki nilai rata-rata 0 dan standar deviasi 1, menggunakan rumus:
 
-   ```math
-   X' = \frac{X - \mu}{\sigma}
-   ```
+   ![Standard Scaler Equation](https://journaldev.nyc3.cdn.digitaloceanspaces.com/2020/10/Standardization.png)
 
    di mana $X$ adalah nilai asli, $\mu$ adalah rata-rata fitur, dan $\sigma$ adalah standar deviasi fitur.
 
