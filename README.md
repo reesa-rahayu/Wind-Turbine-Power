@@ -138,38 +138,42 @@ Tujuan: Membersihkan data dari kesalahan, nilai tak valid, dan ketidaksesuaian a
 
   - Kolom Wind Speed (m/s)
 
-        - Dari hasil visualisasi menggunakan boxplot, ditemukan nilai kecepatan angin yang sangat tinggi yang tergolong sebagai outlier.
-        - Secara teknis, kecepatan angin tinggi bisa saja terjadi secara alami dalam kondisi cuaca ekstrem seperti badai. Namun, perlu dikaji apakah nilai-nilai tersebut:
-          - Masih berada dalam batas operasional turbin.
-          - Cukup signifikan dalam jumlah untuk tetap dipertahankan.
-        - Analisis Outlier dengan Metode IQR:
+    - Dari hasil visualisasi menggunakan boxplot, ditemukan nilai kecepatan angin yang sangat tinggi yang tergolong sebagai outlier.
+    - Secara teknis, kecepatan angin tinggi bisa saja terjadi secara alami dalam kondisi cuaca ekstrem seperti badai. Namun, perlu dikaji apakah nilai-nilai tersebut:
+      - Masih berada dalam batas operasional turbin.
+      - Cukup signifikan dalam jumlah untuk tetap dipertahankan.
+    - Analisis Outlier dengan Metode IQR:
 
-          - Metode Interquartile Range (IQR) digunakan untuk mendeteksi outlier secara statistik.
-          - Nilai lower bound dan upper bound dihitung sebagai berikut:
+      - Metode Interquartile Range (IQR) digunakan untuk mendeteksi outlier secara statistik.
+      - Nilai lower bound dan upper bound dihitung sebagai berikut:
 
-            ```python
-            Q1 = data['Wind Speed (m/s)'].quantile(0.25)
-            Q3 = data['Wind Speed (m/s)'].quantile(0.75)
-            IQR = Q3 - Q1
-            lower_bound = Q1 - 1.5 * IQR
-            upper_bound = Q3 + 1.5 * IQR
+        ```python
+        Q1 = data['Wind Speed (m/s)'].quantile(0.25)
+        Q3 = data['Wind Speed (m/s)'].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
 
-            outliers = data[(data['Wind Speed (m/s)'] < lower_bound) | (data['Wind Speed (m/s)'] > upper_bound)]
-            outliers.shape[0]
-            ```
-          - Ditemukan bahwa hanya sekitar 423 data (kurang dari 1% dari total ~50.000 data) yang tergolong outlier menurut metode ini.
-        - Penanganan:
-          - Outlier tidak dihapus, melainkan diganti (capped) dengan nilai batas bawah (`lower_bound`) dan batas atas (`upper_bound`) menggunakan metode capping (winsorization):
+        outliers = data[(data['Wind Speed (m/s)'] < lower_bound) | (data['Wind Speed (m/s)'] > upper_bound)]
+        outliers.shape[0]
+        ```
 
-          ```python
-          data['Wind Speed (m/s)'] = np.where(data['Wind Speed (m/s)'] < lower_bound, lower_bound, data['Wind Speed (m/s)'])
-          data['Wind Speed (m/s)'] = np.where(data['Wind Speed (m/s)'] > upper_bound, upper_bound, data['Wind Speed (m/s)'])
+      - Ditemukan bahwa hanya sekitar 423 data (kurang dari 1% dari total ~50.000 data) yang tergolong outlier menurut metode ini.
 
-          ```
-        - Alasan:
-          - IQR adalah metode robust yang tidak terpengaruh oleh distribusi ekstrem, sehingga cocok untuk data yang tidak normal.
-          - Metode capping dipilih untuk menjaga jumlah data, sambil membatasi pengaruh nilai ekstrem terhadap proses pelatihan model.
-          - Karena jumlah outlier sangat kecil dan kemungkinan besar merupakan anomali atau noise sensor, mengganti nilai ekstrem ini dapat membantu model menjadi lebih stabil dan akurat.
+    - Penanganan:
+
+      - Outlier tidak dihapus, melainkan diganti (capped) dengan nilai batas bawah (`lower_bound`) dan batas atas (`upper_bound`) menggunakan metode capping (winsorization):
+
+      ```python
+      data['Wind Speed (m/s)'] = np.where(data['Wind Speed (m/s)'] < lower_bound, lower_bound, data['Wind Speed (m/s)'])
+      data['Wind Speed (m/s)'] = np.where(data['Wind Speed (m/s)'] > upper_bound, upper_bound, data['Wind Speed (m/s)'])
+
+      ```
+
+    - Alasan:
+      - IQR adalah metode robust yang tidak terpengaruh oleh distribusi ekstrem, sehingga cocok untuk data yang tidak normal.
+      - Metode capping dipilih untuk menjaga jumlah data, sambil membatasi pengaruh nilai ekstrem terhadap proses pelatihan model.
+      - Karena jumlah outlier sangat kecil dan kemungkinan besar merupakan anomali atau noise sensor, mengganti nilai ekstrem ini dapat membantu model menjadi lebih stabil dan akurat.
 
 #### 2. 🔧 **Feature Engineering**
 
