@@ -182,14 +182,17 @@ Data Preparation dilakukan untuk memastikan bahwa data yang digunakan dalam pemo
    **Langkah yang Diambil**:
    Normalisasi dilakukan menggunakan **StandardScaler**, yaitu metode standardisasi yang mengubah distribusi setiap fitur menjadi memiliki nilai rata-rata 0 dan standar deviasi 1, menggunakan rumus:
 
-   ```math
+   $$
    X' = \frac{X - \mu}{\sigma}
-   ```
+   $$
 
    di mana $X$ adalah nilai asli, $\mu$ adalah rata-rata fitur, dan $\sigma$ adalah standar deviasi fitur.
 
    Alasan Penggunaan:
    Standardisasi digunakan karena metode ini bekerja baik dengan algoritma yang mengasumsikan distribusi data normal atau sensitif terhadap skala, seperti Regresi Linier, SVM, dan Neural Networks. Dengan fitur berada pada skala yang seragam, model dapat mempelajari pola dengan lebih stabil dan efisien.
+
+   $$
+   $$
 
 2. **Splitting Data (Train-Test Split)**
 
