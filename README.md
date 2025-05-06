@@ -55,7 +55,7 @@ Dataset yang digunakan dalam proyek ini adalah [2018 SCADA Data of a Wind Turbin
 
 Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan antar fitur dalam dataset.
 
-1.  Visualisasi Sebaran dan kolerasi antara `LV ActivePower (kW)`,`Wind Speed (m/s)`, `Theoretical_Power_Curve (KWh)`,`Wind Direction (°)`, dan `Temperature (°C)` menggunakan **Pairplot** dan **Histogram**.
+1.  Visualisasi Sebaran dan kolerasi antara `LV ActivePower (kW)`,`Wind Speed (m/s)`, `Theoretical_Power_Curve (KWh)`, dan `Wind Direction (°)` menggunakan **Pairplot** dan **Histogram**.
     ![Pairplot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/pairplot_observed_column.png?raw=true)
 
     ![Histogram](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/histogram_observes_column.png?raw=true)
