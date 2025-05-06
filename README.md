@@ -83,7 +83,7 @@ Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan ant
 
     - Temuan penting:
       - Minimum kecepatan angin untuk menghasilkan daya ≈ **3.6 m/s**
-      - Kecepatan maksimum sebelum daya stagnan ≈ **13.8 m/s**
+      - Kecepatan maksimum sebelum daya stagnan ≈ **17.9 m/s**
 
 4.  Analisis Arah Angin
 
@@ -126,14 +126,15 @@ Tujuan: Membersihkan data dari kesalahan, nilai tak valid, dan ketidaksesuaian a
 - Outlier Handling
   Outlier atau nilai-nilai yang berada jauh di luar distribusi normal dapat menyesatkan model dan menghasilkan prediksi yang tidak realistis, terutama pada algoritma yang sensitif terhadap nilai ekstrem seperti regresi linier, SVM, dan beberapa jenis neural networks. Oleh karena itu, deteksi dan penanganan outlier merupakan langkah penting dalam data preparation.
 
-  Ditemukan nilai negatif pada kolom daya listrik (`LV ActivePower (kW)` ), padahal secara fisik turbin tidak mungkin menghasilkan energi negatif.
+  - Daya listrik (`LV ActivePower (kW)` )
+    Ditemukan nilai negatif pada kolom daya listrik (`LV ActivePower (kW)` ), padahal secara fisik turbin tidak mungkin menghasilkan energi negatif.
 
-  - Penanganan:
-    - Jumlah data anomali dihitung, kemudian semua nilai negatif diganti menjadi **0** menggunakan fungsi `.apply()`.
-  - **Alasan**:
+    - Penanganan:
+      - Jumlah data anomali dihitung, kemudian semua nilai negatif diganti menjadi **0** menggunakan fungsi `.apply()`.
+    - **Alasan**:
 
-    - Mengganti nilai negatif dengan nol merupakan pendekatan yang konservatif dan masuk akal, karena mencerminkan situasi bahwa tidak ada energi yang dihasilkan pada saat itu.
-    - Menghindari model belajar dari data yang tidak realistis dan menjaga validitas fisik data.
+      - Mengganti nilai negatif dengan nol merupakan pendekatan yang konservatif dan masuk akal, karena mencerminkan situasi bahwa tidak ada energi yang dihasilkan pada saat itu.
+      - Menghindari model belajar dari data yang tidak realistis dan menjaga validitas fisik data.
 
   - Kolom Wind Speed (m/s)
 
