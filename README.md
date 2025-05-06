@@ -43,7 +43,7 @@ Dengan langkah-langkah ini, proyek bertujuan untuk mencapai efisiensi dan keakur
 
 Dataset yang digunakan dalam proyek ini adalah [2018 SCADA Data of a Wind Turbine in Turkey](https://www.kaggle.com/datasets/berkerisen/wind-turbine-scada-dataset/data). Dataset ini berisi informasi operasional dari sebuah kincir angin selama periode tertentu, memperlihatkan berbagai variabel yang berkontribusi pada produksi energi. Data ini terukur pada interval waktu tertentu, mulai dari 1 Januari 2018 hingga 13 Desember 2018. Terdiri atas
 
-### Variabel-variabel pada Restaurant UCI dataset adalah sebagai berikut:
+### Variabel-variabel pada 2018 SCADA Data of a Wind Turbine in Turkey dataset adalah sebagai berikut:
 
 - Date/Time: Stempel waktu yang mencatat tanggal dan waktu pengukuran dengan interval 10 menit.
 - LV ActivePower (kW): Energi yang dihasilkan turbin yang menjadi variabel target
@@ -51,94 +51,25 @@ Dataset yang digunakan dalam proyek ini adalah [2018 SCADA Data of a Wind Turbin
 - Wind Direction (degrees): Arah angin yang diukur dalam derajat, membantu dalam memahami bagaimana orientasi kincir angin sehingga berpengaruh terhadap efisiensi.
 - Theoretical_Power_Curve (KWh): Prediksi energi yang dihasilkan turbin secara teoritis.
 
-### Tahapan Exploratory Data Analysis (EDA):
-
-Dilakukan proses sebagai berikut:
-
-#### 🧹 Data Cleaning
-
-1.  Missing Data
-
-    - Dilakukan pemeriksaan jumlah nilai yang hilang pada setiap kolom menggunakan `.isna().sum()`.
-    - Pada data asli sebelum feature engineering tidak terdapat nilai yang kosong.
-    - Untuk kolom suhu (`Temperature (°C)`) yang didapatkan dari proses feature engineering, nilai yang kosong diatasi menggunakan metode **interpolasi**.
-
-2.  Outlier Handling
-    - Pada kolom `LV ActivePower (kW)` ditemukan nilai **negatif**, yang secara fisik tidak mungkin terjadi karena turbin tidak dapat menghasilkan daya negatif.
-    - Jumlah data anomali dihitung, kemudian semua nilai negatif diganti menjadi **0** menggunakan fungsi `.apply()`.
-    - Langkah ini penting untuk menjaga validitas data dan mencegah model belajar dari informasi yang salah.
-
-#### 🔧 **Feature Engineering**
-
-Tahapan ini dilakukan untuk memperkaya dataset dengan fitur-fitur tambahan yang relevan, guna meningkatkan kualitas model prediksi energi angin.
-
-1.  **Ekstraksi Waktu**
-
-    - Menambahkan kolom:
-    - `Hour`: Jam ke berapa (0–23)
-    - `Day`: Hari dalam bulan
-    - `Week`: Minggu ke berapa dalam tahun
-    - `Month`: Bulan ke berapa
-    - Bertujuan menangkap pola harian dan musiman dalam data.
-
-2.  **Identifikasi Musim (Season)**
-
-    - Menentukan musim berdasarkan nilai `Month`:
-    - 1 = Winter (Des–Feb)
-    - 2 = Spring (Mar–Mei)
-    - 3 = Summer (Jun–Agu)
-    - 4 = Autumn (Sep–Nov)
-    - Fitur ini membantu memahami dampak perubahan musim terhadap kecepatan angin.
-
-3.  **Penentuan Siang/Malam (Day/Night)**
-
-    - Menggunakan library **Astral** untuk menghitung waktu matahari terbit dan terbenam di kota Izmir, Turki.
-    - Menambahkan kolom `Day/Night`:
-    - 0 = Siang
-    - 1 = Malam
-    - Bertujuan membedakan perilaku angin antara siang dan malam hari.
-
-4.  **Suhu Udara (Temperature)**
-    - Data suhu diperoleh dari **Meteostat API** berdasarkan lokasi dan waktu.
-    - Disesuaikan ke interval 10 menit agar sinkron dengan data utama.
-    - Fitur `Temperature (°C)` ditambahkan dan nilai yang hilang diisi menggunakan interpolasi.
-    - Suhu digunakan karena berpengaruh terhadap densitas udara yang berperan dalam rumus energi kinetik angin.
-
-#### 📊 Data Analysis & Visualisasi
+### Exploratory Data Analysis (EDA) & Visualisasi
 
 Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan antar fitur dalam dataset.
 
-1.  Analisis Distribusi dan Korelasi
+1.  Visualisasi Sebaran dan kolerasi antara `LV ActivePower (kW)`,`Wind Speed (m/s)`, `Theoretical_Power_Curve (KWh)`,`Wind Direction (°)`, dan `Temperature (°C)` menggunakan **Pairplot** dan **Histogram**.
+    ![Pairplot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/pairplot_observed_column.png?raw=true)
 
-    - Visualisasi awal menggunakan **Pairplot** dan **Histogram** menunjukkan sebaran dan korelasi antara:
+    ![Histogram](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/histogram_observes_column.png?raw=true)
 
-      - `LV ActivePower (kW)`
-      - `Wind Speed (m/s)`
-      - `Theoretical_Power_Curve (KWh)`
-      - `Wind Direction (°)`
-      - `Temperature (°C)`
-
-        ![Pairplot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/pairplot_observed_column.png?raw=true)
-
-        ![Histogram](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/histogram_observes_column.png?raw=true)
-
-    - **Boxplot** digunakan untuk mengidentifikasi outlier, terutama pada kolom `Wind Speed (m/s)`.
-
-2.  Pola Data terhadap Waktu
-
-    - Plot garis menunjukkan pola fluktuasi fitur terhadap waktu.
-    - Memberikan wawasan tentang musim, harian, dan perbedaan waktu (siang vs malam) dalam produksi energi.
-
-3.  Distribusi Energi
+2.  Distribusi Energi
 
     - **Siang vs Malam**: Malam hari menghasilkan energi lebih banyak secara akumulatif.
-    - **Bulanan**: Produksi energi tertinggi terjadi di bulan **Maret** dan **Agustus**.
-    - **Musiman**: Energi paling banyak dihasilkan saat **musim gugur (Autumn)**.
       ![Day/Night Accumulation](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/accumulation_1.png?raw=true)
+    - **Bulanan**: Produksi energi tertinggi terjadi di bulan **Maret** dan **Agustus**.
       ![Month Accumulation](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/accumulation_2.png?raw=true)
+    - **Musiman**: Energi paling banyak dihasilkan saat **musim gugur (Autumn)**.
       ![Season Accumulation](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/accumulation_3.png?raw=true)
 
-4.  Analisis Kecepatan Angin
+3.  Analisis Kecepatan Angin
 
     - Hubungan antara `Wind Speed (m/s)` dan:
 
@@ -150,11 +81,11 @@ Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan ant
 
         ![Wind Speed and Actual Power](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/power_2.png?raw=true)
 
-    - Ditemukan:
-      - Kecepatan minimum untuk menghasilkan daya ≈ **3.6 m/s**
-      - Kecepatan minimum untuk mencapai daya maksimum ≈ **13.8 m/s**
+    - Temuan penting:
+      - Minimum kecepatan angin untuk menghasilkan daya ≈ **3.6 m/s**
+      - Kecepatan maksimum sebelum daya stagnan ≈ **13.8 m/s**
 
-5.  Analisis Arah Angin
+4.  Analisis Arah Angin
 
     - Arah angin tersebar di semua sudut (0–360°), menunjukkan cakupan penuh oleh turbin.
 
@@ -168,7 +99,7 @@ Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan ant
 
       ![Wind direction and Wind Speed](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/wind_direction_2.png?raw=true)
 
-6.  Korelasi Antar Fitur (Heatmap)
+5.  Korelasi Antar Fitur (Heatmap)
     ![Heatmap](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/heatmap.png?raw=true)
 
     - Korelasi kuat ditemukan antara `Wind Speed` dan `Theoretical_Power_Curve`, serta `Wind Speed` dengan `LV ActivePower`.
@@ -180,32 +111,138 @@ Data Preparation dilakukan untuk memastikan bahwa data yang digunakan dalam pemo
 
 ### Proses Data Preparation:
 
-1. **Normalisasi**
-   Masalah Skala Fitur: Beberapa fitur dalam dataset, seperti Wind Speed dan Temperature, memiliki skala yang sangat berbeda. Misalnya, kecepatan angin dapat berkisar antara 0 hingga 25 m/s, sementara suhu dapat berkisar antara 0 hingga 40 °C. Model yang sensitif terhadap skala fitur (seperti regresi linier atau jaringan saraf) dapat dipengaruhi jika fitur dengan skala yang lebih besar mendominasi proses pelatihan. Oleh karena itu, penting untuk menormalkan fitur numerik.
+#### 1. 🧹 Data Cleaning
 
-   **Langkah yang Diambil**:
-   Normalisasi dilakukan menggunakan **StandardScaler**, yaitu metode standardisasi yang mengubah distribusi setiap fitur menjadi memiliki nilai rata-rata 0 dan standar deviasi 1, menggunakan rumus:
+Tujuan: Membersihkan data dari kesalahan, nilai tak valid, dan ketidaksesuaian agar model tidak belajar dari informasi yang salah.
 
-   ![Standard Scaler Equation](https://journaldev.nyc3.cdn.digitaloceanspaces.com/2020/10/Standardization.png)
+- Missing Data
+  Nilai yang hilang dapat menyebabkan error dalam beberapa algoritma _machine learning_, menghasilkan bias jika tidak ditangani dengan tepat, atau menghilangkan informasi penting. Oleh karena itu, perlu dilakukan penanganan pada data-data ini. Berikut langkah yang dilakukan:
 
-   di mana $X$ adalah nilai asli, $\mu$ adalah rata-rata fitur, dan $\sigma$ adalah standar deviasi fitur.
+  - Dilakukan pemeriksaan jumlah nilai yang hilang pada setiap kolom menggunakan `.isna().sum()`.
+  - Pada data asli sebelum feature engineering tidak terdapat nilai yang kosong.
+  - Untuk kolom suhu (`Temperature (°C)`) yang didapatkan dari proses feature engineering, nilai yang kosong diatasi menggunakan metode **interpolasi**.
+    Alasan: Interpolasi adalah metode yang masuk akal untuk mengisi nilai suhu yang hilang berdasarkan nilai-nilai suhu yang berdekatan dalam urutan waktu, sehingga dapat mempertahankan pola temporal data.
 
-   Alasan Penggunaan:
-   Standardisasi digunakan karena metode ini bekerja baik dengan algoritma yang mengasumsikan distribusi data normal atau sensitif terhadap skala, seperti Regresi Linier, SVM, dan Neural Networks. Dengan fitur berada pada skala yang seragam, model dapat mempelajari pola dengan lebih stabil dan efisien.
+- Outlier Handling
+  Outlier atau nilai-nilai yang berada jauh di luar distribusi normal dapat menyesatkan model dan menghasilkan prediksi yang tidak realistis, terutama pada algoritma yang sensitif terhadap nilai ekstrem seperti regresi linier, SVM, dan beberapa jenis neural networks. Oleh karena itu, deteksi dan penanganan outlier merupakan langkah penting dalam data preparation.
 
-2. **Splitting Data (Train-Test Split)**
+  Ditemukan nilai negatif pada kolom daya listrik (`LV ActivePower (kW)` ), padahal secara fisik turbin tidak mungkin menghasilkan energi negatif.
 
-   Pemisahan data menjadi bagian pelatihan dan pengujian penting untuk mencegah overfitting, yaitu kondisi di mana model terlalu “hapal” data pelatihan dan gagal menggeneralisasi ke data baru.
+  - Penanganan:
+    - Jumlah data anomali dihitung, kemudian semua nilai negatif diganti menjadi **0** menggunakan fungsi `.apply()`.
+  - **Alasan**:
 
-   Langkah yang Diambil:
-   Dataset dibagi menjadi:
+    - Mengganti nilai negatif dengan nol merupakan pendekatan yang konservatif dan masuk akal, karena mencerminkan situasi bahwa tidak ada energi yang dihasilkan pada saat itu.
+    - Menghindari model belajar dari data yang tidak realistis dan menjaga validitas fisik data.
 
-   - 80% untuk pelatihan `(X_train, y_train)`
-   - 20% untuk pengujian `(X_test, y_test)`
-     Proses ini dilakukan secara acak dengan `random_state=42` untuk memastikan hasil yang konsisten saat replikasi.
+  - Kolom Wind Speed (m/s)
 
-   Manfaat:
-   Dengan melakukan pemisahan ini, performa model dapat dievaluasi secara objektif terhadap data yang tidak pernah dilihat sebelumnya, memberikan gambaran lebih realistis tentang akurasi model di dunia nyata.
+        - Dari hasil visualisasi menggunakan boxplot, ditemukan nilai kecepatan angin yang sangat tinggi yang tergolong sebagai outlier.
+        - Secara teknis, kecepatan angin tinggi bisa saja terjadi secara alami dalam kondisi cuaca ekstrem seperti badai. Namun, perlu dikaji apakah nilai-nilai tersebut:
+          - Masih berada dalam batas operasional turbin.
+          - Cukup signifikan dalam jumlah untuk tetap dipertahankan.
+        - Analisis Outlier dengan Metode IQR:
+
+          - Metode Interquartile Range (IQR) digunakan untuk mendeteksi outlier secara statistik.
+          - Nilai lower bound dan upper bound dihitung sebagai berikut:
+
+            ```python
+            Q1 = data['Wind Speed (m/s)'].quantile(0.25)
+            Q3 = data['Wind Speed (m/s)'].quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+
+            outliers = data[(data['Wind Speed (m/s)'] < lower_bound) | (data['Wind Speed (m/s)'] > upper_bound)]
+            outliers.shape[0]
+            ```
+          - Ditemukan bahwa hanya sekitar 423 data (kurang dari 1% dari total ~50.000 data) yang tergolong outlier menurut metode ini.
+        - Penanganan:
+          - Outlier tidak dihapus, melainkan diganti (capped) dengan nilai batas bawah (`lower_bound`) dan batas atas (`upper_bound`) menggunakan metode capping (winsorization):
+
+          ```python
+          data['Wind Speed (m/s)'] = np.where(data['Wind Speed (m/s)'] < lower_bound, lower_bound, data['Wind Speed (m/s)'])
+          data['Wind Speed (m/s)'] = np.where(data['Wind Speed (m/s)'] > upper_bound, upper_bound, data['Wind Speed (m/s)'])
+
+          ```
+        - Alasan:
+          - IQR adalah metode robust yang tidak terpengaruh oleh distribusi ekstrem, sehingga cocok untuk data yang tidak normal.
+          - Metode capping dipilih untuk menjaga jumlah data, sambil membatasi pengaruh nilai ekstrem terhadap proses pelatihan model.
+          - Karena jumlah outlier sangat kecil dan kemungkinan besar merupakan anomali atau noise sensor, mengganti nilai ekstrem ini dapat membantu model menjadi lebih stabil dan akurat.
+
+#### 2. 🔧 **Feature Engineering**
+
+Tahapan ini dilakukan untuk memperkaya dataset dengan fitur-fitur tambahan yang relevan, guna meningkatkan kualitas model prediksi energi angin. Fitur yang baik dapat membantu model untuk lebih baik memahami pola dalam data dan meningkatkan akurasi prediksi.
+
+1.  **Ekstraksi Waktu**
+
+    - Menambahkan kolom:
+      - `Hour`: Jam ke berapa (0–23)
+      - `Day`: Hari dalam bulan
+      - `Week`: Minggu ke berapa dalam tahun
+      - `Month`: Bulan ke berapa
+    - Alasan: Untuk menangkap pola harian, mingguan, dan musiman yang berpotensi memengaruhi produksi energi angin.
+
+2.  **Identifikasi Musim (Season)**
+
+    - Menentukan musim berdasarkan nilai `Month`:
+      - 1 = Winter (Des–Feb)
+      - 2 = Spring (Mar–Mei)
+      - 3 = Summer (Jun–Agu)
+      - 4 = Autumn (Sep–Nov)
+    - Alasan: Kecepatan angin dan produksi energi sangat dipengaruhi oleh perubahan musim, sehingga fitur ini memperkaya informasi kontekstual yang dapat dipelajari oleh model.
+
+3.  **Penentuan Siang/Malam (Day/Night)**
+
+    - Menggunakan library **Astral** untuk menghitung waktu matahari terbit dan terbenam di kota Izmir, Turki.
+    - Menambahkan kolom `Day/Night`:
+      - 0 = Siang
+      - 1 = Malam
+    - Alasan: Pola angin dapat berbeda signifikan antara siang dan malam hari. Fitur ini membantu model membedakan karakteristik produksi energi berdasarkan waktu hari.
+
+4.  **Suhu Udara (Temperature)**
+    - Alasan: Suhu berpengaruh terhadap densitas udara, yang secara langsung memengaruhi energi kinetik angin. Menambahkan fitur ini dapat meningkatkan akurasi prediksi daya turbin.
+    - Data suhu diperoleh dari **Meteostat API** berdasarkan lokasi dan waktu.
+    - Disesuaikan ke interval 10 menit agar sinkron dengan data utama.
+    - Fitur `Temperature (°C)` ditambahkan dan nilai yang hilang diisi menggunakan interpolasi.
+
+#### 3. **Exploratory Data Analysis (EDA) Lanjutan**
+
+Setelah proses Feature Engineering selesai, dilakukan EDA lanjutan untuk menganalisis pengaruh fitur-fitur baru terhadap energi yang dihasilkan (LV ActivePower (kW)). Langkah ini bertujuan untuk menggali hubungan baru, menemukan pola tersembunyi, dan mendapatkan pemahaman yang lebih dalam mengenai perilaku sistem turbin angin berdasarkan konteks waktu, musim, dan kondisi lingkungan.
+
+🎯 Tujuan EDA Lanjutan:
+
+- Memvalidasi bahwa fitur hasil feature engineering memiliki nilai prediktif terhadap target (LV ActivePower).
+- Membantu dalam pemilihan fitur untuk proses modeling.
+- Menyediakan insight domain-spesifik tentang bagaimana kondisi waktu dan lingkungan memengaruhi output energi turbin.
+
+#### 4. **Normalisasi**
+
+Beberapa fitur dalam dataset, seperti Wind Speed dan Temperature, memiliki skala yang sangat berbeda. Misalnya, kecepatan angin dapat berkisar antara 0 hingga 25 m/s, sementara suhu dapat berkisar antara 0 hingga 40 °C. Model yang sensitif terhadap skala fitur (seperti regresi linier atau jaringan saraf) dapat dipengaruhi jika fitur dengan skala yang lebih besar mendominasi proses pelatihan. Oleh karena itu, penting untuk menormalkan fitur numerik.
+
+**Langkah yang Diambil**:
+Normalisasi dilakukan menggunakan **StandardScaler**, yaitu metode standardisasi yang mengubah distribusi setiap fitur menjadi memiliki nilai rata-rata 0 dan standar deviasi 1, menggunakan rumus:
+
+![Standard Scaler Equation](https://journaldev.nyc3.cdn.digitaloceanspaces.com/2020/10/Standardization.png)
+
+di mana $X$ adalah nilai asli, $\mu$ adalah rata-rata fitur, dan $\sigma$ adalah standar deviasi fitur.
+
+Alasan Penggunaan:
+Standardisasi digunakan karena metode ini bekerja baik dengan algoritma yang mengasumsikan distribusi data normal atau sensitif terhadap skala, seperti Regresi Linier, SVM, dan Neural Networks. Dengan fitur berada pada skala yang seragam, model dapat mempelajari pola dengan lebih stabil dan efisien.
+
+#### 5. **Splitting Data (Train-Test Split)**
+
+Pemisahan data menjadi bagian pelatihan dan pengujian penting untuk mencegah overfitting, yaitu kondisi di mana model terlalu “hapal” data pelatihan dan gagal menggeneralisasi ke data baru.
+
+Langkah yang Diambil:
+Dataset dibagi menjadi:
+
+- 80% untuk pelatihan `(X_train, y_train)`
+- 20% untuk pengujian `(X_test, y_test)`
+  Proses ini dilakukan secara acak dengan `random_state=42` untuk memastikan hasil yang konsisten saat replikasi.
+
+Manfaat:
+Dengan melakukan pemisahan ini, performa model dapat dievaluasi secara objektif terhadap data yang tidak pernah dilihat sebelumnya, memberikan gambaran lebih realistis tentang akurasi model di dunia nyata.
 
 ## 🤖 Modeling
 
@@ -214,8 +251,6 @@ Pemodelan dilakukan untuk memprediksi daya listrik (`LV ActivePower (kW)`) yang 
 ### ⚙️ Tahapan Pemodelan dan Parameter yang Digunakan
 
 Untuk memprediksi daya listrik (LV ActivePower (kW)) yang dihasilkan turbin angin, proses pemodelan dilakukan dengan pendekatan eksperimen komparatif terhadap 10 algoritma regresi populer. Tujuannya adalah mengidentifikasi model dengan performa terbaik berdasarkan data fitur yang tersedia seperti kecepatan angin, suhu, dan parameter operasional lainnya.
-
-✅ Langkah-Langkah Pemodelan
 
 1. Inisialisasi Model
    Dilakukan inisiasi baseline model dengan parameter awal sama yaitu `random_state=42`. Sepuluh model regresi dari berbagai kategori (linear, pohon keputusan, ensemble, dan boosting) digunakan:
@@ -235,82 +270,7 @@ models = [
 ]
 ```
 
-2. Training dan Evaluasi
-   Setiap model dilatih menggunakan data pelatihan (X_train, y_train) dan diuji terhadap data pengujian (X_test, y_test). Hasil evaluasi disimpan dalam daftar.
-
-   🧪 **Hasil Training Model**
-
-Setelah proses pelatihan dan evaluasi dilakukan terhadap berbagai algoritma regresi, berikut adalah perbandingan performa masing-masing model berdasarkan empat metrik evaluasi:
-
-| Model                   | R² Score | RMSE   | MAE    | MAPE        |
-| ----------------------- | -------- | ------ | ------ | ----------- |
-| **CatBoost Regressor**  | 0.9847   | 161.73 | 71.92  | 7.20 × 10¹⁶ |
-| **XGBoost Regressor**   | 0.9833   | 168.73 | 72.44  | 7.05 × 10¹⁶ |
-| ExtraTrees Regressor    | 0.9782   | 192.76 | 69.95  | 7.04 × 10¹⁶ |
-| Random Forest Regressor | 0.9754   | 204.84 | 73.30  | 7.66 × 10¹⁶ |
-| Decision Tree Regressor | 0.9569   | 271.19 | 88.62  | 5.87 × 10¹⁶ |
-| Gradient Boosting Regr. | 0.9519   | 286.55 | 127.70 | 1.54 × 10¹⁷ |
-| XGBRF Regressor         | 0.9464   | 302.54 | 123.74 | 1.48 × 10¹⁷ |
-| Linear Regression       | 0.9059   | 400.72 | 207.78 | 3.00 × 10¹⁷ |
-| SVR                     | 0.8951   | 423.00 | 165.70 | 2.37 × 10¹⁷ |
-| AdaBoost Regressor      | 0.8857   | 441.57 | 273.10 | 2.00 × 10   |
-
-🔍 **Interpretasi Hasil**:
-
-- **CatBoost Regressor** dan **XGBoost Regressor** menunjukkan performa terbaik dengan nilai R² mendekati 1, menunjukkan bahwa model mampu menjelaskan hampir seluruh variansi data target.
-- **ExtraTrees** dan **RandomForest** juga tampil cukup kuat, meskipun sedikit di bawah dua model boosting tersebut.
-- Model seperti **AdaBoost**, **Linear Regression**, dan **SVR** memiliki performa paling rendah, menunjukkan bahwa mereka kurang cocok untuk data yang kompleks seperti dalam kasus turbin angin ini.
-- Nilai **MAPE** yang sangat besar secara absolut menunjukkan bahwa skala target variabel cukup besar atau terdapat nilai mendekati nol yang memperbesar error relatif (perlu pengecekan lebih lanjut jika MAPE akan digunakan untuk keputusan akhir).
-
-3. Pemilihan Model Terbaik ✅
-   Berdasarkan evaluasi, **CatBoost Regressor** dipilih sebagai model terbaik karena menghasilkan prediksi paling akurat (R² tertinggi dan RMSE/MAE terendah). Selain itu, model ini juga mampu menangani kompleksitas dan non-linearitas data dengan sangat baik tanpa perlu banyak preprocessing.
-
-4. 🛠️ Fine Tuning Model
-   Berdasarkan hasil evaluasi awal, model **CatBoost Regressor** menunjukkan performa terbaik dalam memprediksi daya listrik yang dihasilkan oleh turbin angin. Untuk lebih mengoptimalkan kinerjanya, dilakukan proses fine-tuning terhadap hyperparameter model.
-
-Tujuan utama fine tuning adalah untuk mencari kombinasi parameter terbaik yang meminimalkan error prediksi. Proses ini dilakukan menggunakan **RandomizedSearchCV** dari scikit-learn dengan metrik evaluasi berupa **Root Mean Squared Error (RMSE)**.
-
-🧪 **Hyperparameter yang Diuji**
-
-- `learning_rate`: Tingkat pembelajaran untuk proses boosting.
-- `iterations`: Jumlah pohon yang dibangun (estimators).
-- `depth`: Kedalaman maksimum dari setiap pohon.
-- `subsample`: Proporsi data yang digunakan untuk setiap pohon.
-- `colsample_bylevel`: Proporsi fitur yang digunakan di setiap level pohon.
-- `l2_leaf_reg`: Regularisasi L2 untuk mengurangi overfitting.
-- `min_child_samples`: Minimum jumlah sampel di simpul daun.
-
-🔍 **Proses dan Hasil Tuning**
-
-Tuning dilakukan dengan:
-
-- `n_iter = 50` kombinasi parameter acak.
-- `cv = 5` cross-validation untuk menjaga generalisasi.
-
-Setelah tuning, model CatBoost dilatih kembali menggunakan kombinasi parameter terbaik (`best_params`). Evaluasi akhir dilakukan dengan membandingkan hasil prediksi pada data uji (X_test) terhadap nilai aktual (y_test).
-
-✅ Hasil Evaluasi Akhir
-
-| Metrik   | Nilai                 |
-| -------- | --------------------- |
-| R² Score | 0.9881578176597767    |
-| RMSE     | 142.14934648611487    |
-| MAE      | 59.72447828787168     |
-| MAPE     | 5.304711773256123e+16 |
-
-5. 📊 Visualisasi Prediksi
-
-Grafik berikut menunjukkan perbandingan antara:
-
-- Daya aktual yang dihasilkan (`LV ActivePower`)
-- Prediksi model (`Predictions`)
-- Daya teoretis (`Theoretical_Power_Curve`)
-
-Daya aktual dan prediksi menunjukkan kecocokan yang sangat baik terhadap kecepatan angin, mendekati nilai daya teoretis, menandakan bahwa model bekerja secara realistis dan akurat.
-
-![Prediction Plot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/prediction_plot.png?raw=true)
-
-### 📌 Model yang Digunakan
+#### 📌 Model yang Digunakan
 
 1. **Gradient Boosting Regressor**
    Gradient Boosting adalah metode ensambel yang membangun model prediksi secara bertahap, di mana setiap model baru berusaha mengoreksi kesalahan dari model sebelumnya. Model ini menggabungkan banyak weak learners (biasanya decision tree) secara bertahap menggunakan gradient descent untuk meminimalkan loss function. Cocok untuk data kompleks yang tidak linear.
@@ -412,6 +372,60 @@ Daya aktual dan prediksi menunjukkan kecocokan yang sangat baik terhadap kecepat
   - Dokumentasi lebih terbatas dibanding XGBoost
   - Proses pelatihan awal lebih lambat
 
+2. Training dan Evaluasi
+   Setiap model dilatih menggunakan data pelatihan (X_train, y_train) dan diuji terhadap data pengujian (X_test, y_test). Hasil evaluasi disimpan dalam daftar.
+
+   🧪 **Hasil Training Model**
+
+Setelah proses pelatihan dan evaluasi dilakukan terhadap berbagai algoritma regresi, berikut adalah perbandingan performa masing-masing model berdasarkan empat metrik evaluasi:
+
+| Model                     | R² Score   | RMSE       | MAE          | MAPE         |
+| ------------------------- | ---------- | ---------- | ------------ | ------------ |
+| CatBoostRegressor         | 0.984136   | 164.526242 | 72.580935    | 7.378838e+16 |
+| XGBRegressor 0.983315     | 168.731432 | 73.877128  | 7.464262e+16 |
+| ExtraTreesRegressor       | 0.978385   | 192.048116 | 69.812715    | 6.989515e+16 |
+| RandomForestRegressor     | 0.975389   | 204.925309 | 73.270102    | 7.666696e+16 |
+| DecisionTreeRegressor     | 0.957625   | 268.897146 | 88.132662    | 5.869001e+16 |
+| GradientBoostingRegressor | 0.951877   | 286.554685 | 127.704954   | 1.544708e+17 |
+| XGBRFRegressor            | 0.945945   | 303.701156 | 123.869380   | 1.482155e+17 |
+| LinearRegression          | 0.905880   | 400.747716 | 207.871353   | 3.014076e+17 |
+| SVR                       | 0.895137   | 423.000772 | 165.704126   | 2.368704e+17 |
+| AdaBoostRegressor         | 0.885727   | 441.571286 | 273.100957   | 1.999998e+17 |
+
+🔍 **Interpretasi Hasil**:
+
+- **CatBoost Regressor** dan **XGBoost Regressor** menunjukkan performa terbaik dengan nilai R² mendekati 1, menunjukkan bahwa model mampu menjelaskan hampir seluruh variansi data target.
+- **ExtraTrees** dan **RandomForest** juga tampil cukup kuat, meskipun sedikit di bawah dua model boosting tersebut.
+- Model seperti **AdaBoost**, **Linear Regression**, dan **SVR** memiliki performa paling rendah, menunjukkan bahwa mereka kurang cocok untuk data yang kompleks seperti dalam kasus turbin angin ini.
+- Nilai **MAPE** yang sangat besar secara absolut menunjukkan bahwa skala target variabel cukup besar atau terdapat nilai mendekati nol yang memperbesar error relatif (perlu pengecekan lebih lanjut jika MAPE akan digunakan untuk keputusan akhir).
+
+3. Pemilihan Model Terbaik ✅
+   Berdasarkan evaluasi, **CatBoost Regressor** dipilih sebagai model terbaik karena menghasilkan prediksi paling akurat (R² tertinggi dan RMSE/MAE terendah). Selain itu, model ini juga mampu menangani kompleksitas dan non-linearitas data dengan sangat baik tanpa perlu banyak preprocessing.
+
+4. 🛠️ Fine Tuning Model
+   Berdasarkan hasil evaluasi awal, model **CatBoost Regressor** menunjukkan performa terbaik dalam memprediksi daya listrik yang dihasilkan oleh turbin angin. Untuk lebih mengoptimalkan kinerjanya, dilakukan proses fine-tuning terhadap hyperparameter model.
+
+Tujuan utama fine tuning adalah untuk mencari kombinasi parameter terbaik yang meminimalkan error prediksi. Proses ini dilakukan menggunakan **RandomizedSearchCV** dari scikit-learn dengan metrik evaluasi berupa **Root Mean Squared Error (RMSE)**.
+
+🧪 **Hyperparameter yang Diuji**
+
+- `learning_rate`: Tingkat pembelajaran untuk proses boosting.
+- `iterations`: Jumlah pohon yang dibangun (estimators).
+- `depth`: Kedalaman maksimum dari setiap pohon.
+- `subsample`: Proporsi data yang digunakan untuk setiap pohon.
+- `colsample_bylevel`: Proporsi fitur yang digunakan di setiap level pohon.
+- `l2_leaf_reg`: Regularisasi L2 untuk mengurangi overfitting.
+- `min_child_samples`: Minimum jumlah sampel di simpul daun.
+
+🔍 **Proses dan Hasil Tuning**
+
+Tuning dilakukan dengan:
+
+- `n_iter = 50` kombinasi parameter acak.
+- `cv = 5` cross-validation untuk menjaga generalisasi.
+
+Setelah tuning, model CatBoost dilatih kembali menggunakan kombinasi parameter terbaik (`best_params`). Evaluasi akhir dilakukan dengan membandingkan hasil prediksi pada data uji (X_test) terhadap nilai aktual (y_test).
+
 ## ⚙️ Evaluation
 
 Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, evaluasi dilakukan untuk menilai kinerja model-model yang telah dibangun. Evaluasi ini menggunakan beberapa metrik yang penting untuk masalah regresi kontinu karena fokus kita adalah memprediksi output daya yang dihasilkan dari kincir angin.
@@ -510,6 +524,27 @@ Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, e
    **Kekurangan**:
 
    - Hanya dapat digunakan dengan model regresi dan tidak memberikan informasi mengenai kekuatan hubungan antar variabel independen dan dependen.
+
+### ✅ Hasil Evaluasi Model Akhir
+
+| Metrik   | Nilai                  |
+| -------- | ---------------------- |
+| R² Score | 0.9875110681229394     |
+| RMSE     | 145.97942337297064     |
+| MAE      | 61.40934968194007      |
+| MAPE     | 5.6951631630036136e+16 |
+
+### 📊 Visualisasi Prediksi
+
+Grafik berikut menunjukkan perbandingan antara:
+
+- Daya aktual yang dihasilkan (`LV ActivePower`)
+- Prediksi model (`Predictions`)
+- Daya teoretis (`Theoretical_Power_Curve`)
+
+Daya aktual dan prediksi menunjukkan kecocokan yang sangat baik terhadap kecepatan angin, mendekati nilai daya teoretis, menandakan bahwa model bekerja secara realistis dan akurat.
+
+![Prediction Plot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/prediction_plot.png?raw=true)
 
 ## Referensi
 

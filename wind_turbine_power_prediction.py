@@ -51,7 +51,48 @@ data.info()
 data['Date/Time'] = pd.to_datetime(data['Date/Time'], format="%d %m %Y %H:%M")
 data.info()
 
-"""#### Missing Data"""
+"""#### EDA and Visualisasi"""
+
+data.columns
+
+observed_columns = ['LV ActivePower (kW)', 'Wind Speed (m/s)',
+       'Theoretical_Power_Curve (KWh)', 'Wind Direction (°)']
+
+sns.pairplot(data[observed_columns])
+plt.show()
+
+data[observed_columns].hist(bins =20, figsize=(12,8))
+
+"""##### features over time"""
+
+for column in observed_columns:
+    plt.figure(figsize=(10, 6))
+    plt.plot(data['Date/Time'], data[column])
+    plt.xlabel('Date/Time')
+    plt.ylabel(column)
+    plt.title(f'{column} over Time')
+    plt.grid(True)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+"""##### Heatmap"""
+
+data_numeric = data[observed_columns]
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(data_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Heatmap of Numerical Features')
+plt.show()
+
+"""Dari heatmap, fitur yang paling signifikan terhadap ActivePower yaitu Wind Speed.
+
+# Data Preparation
+
+## Data Cleaning
+
+#### Missing Data
+"""
 
 print(data.isna().sum())
 
@@ -69,7 +110,29 @@ data["LV ActivePower (kW)"] = data["LV ActivePower (kW)"].apply(lambda x: 0 if x
 
 data.describe()
 
-"""#### Feature Engineering"""
+for column in data.describe().columns:
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+    sns.histplot(data[column], ax=ax[0], color='green', kde=True)
+    sns.boxplot(x=data[column], ax=ax[1])
+    plt.show()
+
+"""Terdapat Outlier pada kolom Wind Speed"""
+
+# Identify outliers in 'Wind Speed (m/s)' using the IQR method.
+Q1 = data['Wind Speed (m/s)'].quantile(0.25)
+Q3 = data['Wind Speed (m/s)'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers = data[(data['Wind Speed (m/s)'] < lower_bound) | (data['Wind Speed (m/s)'] > upper_bound)]
+outliers.shape[0]
+
+data['Wind Speed (m/s)'] = np.where(data['Wind Speed (m/s)'] < lower_bound, lower_bound, data['Wind Speed (m/s)'])
+data['Wind Speed (m/s)'] = np.where(data['Wind Speed (m/s)'] > upper_bound, upper_bound, data['Wind Speed (m/s)'])
+data.describe()
+
+"""## Feature Engineering"""
 
 # ekstraksi date/time ke hour, day, week, mounth
 data['Week'] = data['Date/Time'].dt.isocalendar().week
@@ -174,43 +237,10 @@ data['Temperature (°C)'] = data['Temperature (°C)'].interpolate()
 
 print(data['Temperature (°C)'].isna().sum())
 
-"""#### EDA and Visualisasi"""
+"""## Analisis dan Visualisasi Lebih Lanjut (Bagian dari EDA)
 
-data.columns
-
-observed_columns = ['LV ActivePower (kW)', 'Wind Speed (m/s)',
-       'Theoretical_Power_Curve (KWh)', 'Wind Direction (°)', 'Temperature (°C)']
-
-sns.pairplot(data[observed_columns])
-plt.show()
-
-data[observed_columns].hist(bins =20, figsize=(12,8))
-
-"""##### box plot"""
-
-for column in data.describe().columns:
-    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-    sns.histplot(data[column], ax=ax[0], color='green', kde=True)
-    sns.boxplot(x=data[column], ax=ax[1])
-    plt.show()
-
-"""Terdapat outlier pada data kecepatan angin
-
-##### features over time
+##### Akumulasi Energi berdasarkan waktu
 """
-
-for column in observed_columns:
-    plt.figure(figsize=(10, 6))
-    plt.plot(data['Date/Time'], data[column])
-    plt.xlabel('Date/Time')
-    plt.ylabel(column)
-    plt.title(f'{column} over Time')
-    plt.grid(True)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
-
-"""##### Distribusi Energi yang dihasilkan"""
 
 day_power = data.groupby('Day/Night')['LV ActivePower (kW)'].sum()
 day_power.index = ['Day', 'Night']
@@ -337,25 +367,11 @@ plt.show()
 
 Hal ini juga mengindikasikan penempatan turbin yang optimal dengan kondisi angin pada wilayah Izmir, Turki
 
-##### Heatmap
-"""
-
-data_numeric = data[observed_columns]
-
-plt.figure(figsize=(10, 8))
-sns.heatmap(data_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
-plt.title('Correlation Heatmap of Numerical Features')
-plt.show()
-
-"""Dari heatmap, fitur yang paling signifikan terhadap PCOS_Diagnosis yaitu Menstrual_Irregularity dan BMI.
-
-# Data Preparation
+## Normalisasi
 """
 
 data = data.set_index('Date/Time')
 data.head()
-
-"""### Normalisasi"""
 
 from sklearn.preprocessing import StandardScaler
 
@@ -368,7 +384,7 @@ data_scaled = pd.concat([data_scaled, data.drop(observed_columns, axis=1)], axis
 
 data_scaled.head()
 
-"""### Splitting Data
+"""## Splitting Data
 
 Dataset dibagi menjadi 80% data pelatihan dan 20% data pengujian atau validation data untuk lebih menilai kinerja model
 """
