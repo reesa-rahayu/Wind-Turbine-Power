@@ -257,8 +257,9 @@ Pemodelan dilakukan untuk memprediksi daya listrik (`LV ActivePower (kW)`) yang 
 
 Untuk memprediksi daya listrik (LV ActivePower (kW)) yang dihasilkan turbin angin, proses pemodelan dilakukan dengan pendekatan eksperimen komparatif terhadap 10 algoritma regresi populer. Tujuannya adalah mengidentifikasi model dengan performa terbaik berdasarkan data fitur yang tersedia seperti kecepatan angin, suhu, dan parameter operasional lainnya.
 
-1. Inisialisasi Model
-   Dilakukan inisiasi baseline model dengan parameter awal sama yaitu `random_state=42`. Sepuluh model regresi dari berbagai kategori (linear, pohon keputusan, ensemble, dan boosting) digunakan:
+#### 1. Inisialisasi Model
+
+Dilakukan inisiasi baseline model dengan parameter awal sama yaitu `random_state=42`. Sepuluh model regresi dari berbagai kategori (linear, pohon keputusan, ensemble, dan boosting) digunakan:
 
 ```python
 models = [
@@ -275,7 +276,7 @@ models = [
 ]
 ```
 
-#### 📌 Model yang Digunakan
+##### 📌 Model yang Digunakan
 
 1. **Gradient Boosting Regressor**
    Gradient Boosting adalah metode ensambel yang membangun model prediksi secara bertahap, di mana setiap model baru berusaha mengoreksi kesalahan dari model sebelumnya. Model ini menggabungkan banyak weak learners (biasanya decision tree) secara bertahap menggunakan gradient descent untuk meminimalkan loss function. Cocok untuk data kompleks yang tidak linear.
@@ -377,61 +378,62 @@ models = [
   - Dokumentasi lebih terbatas dibanding XGBoost
   - Proses pelatihan awal lebih lambat
 
-2. Training dan Evaluasi
-   Setiap model dilatih menggunakan data pelatihan (X_train, y_train) dan diuji terhadap data pengujian (X_test, y_test). Hasil evaluasi disimpan dalam daftar.
+#### 2. Training dan Evaluasi
 
-   🧪 **Hasil Training Model**
+Setiap model dilatih menggunakan data pelatihan (X_train, y_train) dan diuji terhadap data pengujian (X_test, y_test). Hasil evaluasi disimpan dalam daftar.
 
-   Setelah proses pelatihan dan evaluasi dilakukan terhadap berbagai algoritma regresi, berikut adalah perbandingan performa masing-masing model berdasarkan empat metrik evaluasi:
+🧪 **Hasil Training Model**
 
-   | Model                     | R² Score   | RMSE       | MAE          | MAPE         |
-   | ------------------------- | ---------- | ---------- | ------------ | ------------ |
-   | CatBoostRegressor         | 0.984136   | 164.526242 | 72.580935    | 7.378838e+16 |
-   | XGBRegressor 0.983315     | 168.731432 | 73.877128  | 7.464262e+16 |
-   | ExtraTreesRegressor       | 0.978385   | 192.048116 | 69.812715    | 6.989515e+16 |
-   | RandomForestRegressor     | 0.975389   | 204.925309 | 73.270102    | 7.666696e+16 |
-   | DecisionTreeRegressor     | 0.957625   | 268.897146 | 88.132662    | 5.869001e+16 |
-   | GradientBoostingRegressor | 0.951877   | 286.554685 | 127.704954   | 1.544708e+17 |
-   | XGBRFRegressor            | 0.945945   | 303.701156 | 123.869380   | 1.482155e+17 |
-   | LinearRegression          | 0.905880   | 400.747716 | 207.871353   | 3.014076e+17 |
-   | SVR                       | 0.895137   | 423.000772 | 165.704126   | 2.368704e+17 |
-   | AdaBoostRegressor         | 0.885727   | 441.571286 | 273.100957   | 1.999998e+17 |
+Setelah proses pelatihan dan evaluasi dilakukan terhadap berbagai algoritma regresi, berikut adalah perbandingan performa masing-masing model berdasarkan empat metrik evaluasi:
 
-   🔍 **Interpretasi Hasil**:
+| Model                     | R² Score   | RMSE       | MAE          | MAPE         |
+| ------------------------- | ---------- | ---------- | ------------ | ------------ |
+| CatBoostRegressor         | 0.984136   | 164.526242 | 72.580935    | 7.378838e+16 |
+| XGBRegressor 0.983315     | 168.731432 | 73.877128  | 7.464262e+16 |
+| ExtraTreesRegressor       | 0.978385   | 192.048116 | 69.812715    | 6.989515e+16 |
+| RandomForestRegressor     | 0.975389   | 204.925309 | 73.270102    | 7.666696e+16 |
+| DecisionTreeRegressor     | 0.957625   | 268.897146 | 88.132662    | 5.869001e+16 |
+| GradientBoostingRegressor | 0.951877   | 286.554685 | 127.704954   | 1.544708e+17 |
+| XGBRFRegressor            | 0.945945   | 303.701156 | 123.869380   | 1.482155e+17 |
+| LinearRegression          | 0.905880   | 400.747716 | 207.871353   | 3.014076e+17 |
+| SVR                       | 0.895137   | 423.000772 | 165.704126   | 2.368704e+17 |
+| AdaBoostRegressor         | 0.885727   | 441.571286 | 273.100957   | 1.999998e+17 |
 
-   - **CatBoost Regressor** dan **XGBoost Regressor** menunjukkan performa terbaik dengan nilai R² mendekati 1, menunjukkan bahwa model mampu menjelaskan hampir seluruh variansi data target.
-   - **ExtraTrees** dan **RandomForest** juga tampil cukup kuat, meskipun sedikit di bawah dua model boosting tersebut.
-   - Model seperti **AdaBoost**, **Linear Regression**, dan **SVR** memiliki performa paling rendah, menunjukkan bahwa mereka kurang cocok untuk data yang kompleks seperti dalam kasus turbin angin ini.
-   - Nilai **MAPE** yang sangat besar secara absolut menunjukkan bahwa skala target variabel cukup besar atau terdapat nilai mendekati nol yang memperbesar error relatif (perlu pengecekan lebih lanjut jika MAPE akan digunakan untuk keputusan akhir).
+🔍 **Interpretasi Hasil**:
 
-3. Pemilihan Model Terbaik ✅
+- **CatBoost Regressor** dan **XGBoost Regressor** menunjukkan performa terbaik dengan nilai R² mendekati 1, menunjukkan bahwa model mampu menjelaskan hampir seluruh variansi data target.
+- **ExtraTrees** dan **RandomForest** juga tampil cukup kuat, meskipun sedikit di bawah dua model boosting tersebut.
+- Model seperti **AdaBoost**, **Linear Regression**, dan **SVR** memiliki performa paling rendah, menunjukkan bahwa mereka kurang cocok untuk data yang kompleks seperti dalam kasus turbin angin ini.
+- Nilai **MAPE** yang sangat besar secara absolut menunjukkan bahwa skala target variabel cukup besar atau terdapat nilai mendekati nol yang memperbesar error relatif (perlu pengecekan lebih lanjut jika MAPE akan digunakan untuk keputusan akhir).
 
-   Berdasarkan evaluasi, **CatBoost Regressor** dipilih sebagai model terbaik karena menghasilkan prediksi paling akurat (R² tertinggi dan RMSE/MAE terendah). Selain itu, model ini juga mampu menangani kompleksitas dan non-linearitas data dengan sangat baik tanpa perlu banyak preprocessing.
+#### 3. Pemilihan Model Terbaik ✅
 
-4. 🛠️ Fine Tuning Model
+Berdasarkan evaluasi, **CatBoost Regressor** dipilih sebagai model terbaik karena menghasilkan prediksi paling akurat (R² tertinggi dan RMSE/MAE terendah). Selain itu, model ini juga mampu menangani kompleksitas dan non-linearitas data dengan sangat baik tanpa perlu banyak preprocessing.
 
-   Berdasarkan hasil evaluasi awal, model **CatBoost Regressor** menunjukkan performa terbaik dalam memprediksi daya listrik yang dihasilkan oleh turbin angin. Untuk lebih mengoptimalkan kinerjanya, dilakukan proses fine-tuning terhadap hyperparameter model.
+#### 4. 🛠️ Fine Tuning Model
 
-   Tujuan utama fine tuning adalah untuk mencari kombinasi parameter terbaik yang meminimalkan error prediksi. Proses ini dilakukan menggunakan **RandomizedSearchCV** dari scikit-learn dengan metrik evaluasi berupa **Root Mean Squared Error (RMSE)**.
+Berdasarkan hasil evaluasi awal, model **CatBoost Regressor** menunjukkan performa terbaik dalam memprediksi daya listrik yang dihasilkan oleh turbin angin. Untuk lebih mengoptimalkan kinerjanya, dilakukan proses fine-tuning terhadap hyperparameter model.
 
-   🧪 **Hyperparameter yang Diuji**
+Tujuan utama fine tuning adalah untuk mencari kombinasi parameter terbaik yang meminimalkan error prediksi. Proses ini dilakukan menggunakan **RandomizedSearchCV** dari scikit-learn dengan metrik evaluasi berupa **Root Mean Squared Error (RMSE)**.
 
-   - `learning_rate`: Tingkat pembelajaran untuk proses boosting.
-   - `iterations`: Jumlah pohon yang dibangun (estimators).
-   - `depth`: Kedalaman maksimum dari setiap pohon.
-   - `subsample`: Proporsi data yang digunakan untuk setiap pohon.
-   - `colsample_bylevel`: Proporsi fitur yang digunakan di setiap level pohon.
-   - `l2_leaf_reg`: Regularisasi L2 untuk mengurangi overfitting.
-   - `min_child_samples`: Minimum jumlah sampel di simpul daun.
+🧪 **Hyperparameter yang Diuji**
 
-   🔍 **Proses dan Hasil Tuning**
+- `learning_rate`: Tingkat pembelajaran untuk proses boosting.
+- `iterations`: Jumlah pohon yang dibangun (estimators).
+- `depth`: Kedalaman maksimum dari setiap pohon.
+- `subsample`: Proporsi data yang digunakan untuk setiap pohon.
+- `colsample_bylevel`: Proporsi fitur yang digunakan di setiap level pohon.
+- `l2_leaf_reg`: Regularisasi L2 untuk mengurangi overfitting.
+- `min_child_samples`: Minimum jumlah sampel di simpul daun.
 
-   Tuning dilakukan dengan:
+🔍 **Proses dan Hasil Tuning**
 
-   - `n_iter = 50` kombinasi parameter acak.
-   - `cv = 5` cross-validation untuk menjaga generalisasi.
+Tuning dilakukan dengan:
 
-   Setelah tuning, model CatBoost dilatih kembali menggunakan kombinasi parameter terbaik (`best_params`). Evaluasi akhir dilakukan dengan membandingkan hasil prediksi pada data uji (X_test) terhadap nilai aktual (y_test).
+- `n_iter = 50` kombinasi parameter acak.
+- `cv = 5` cross-validation untuk menjaga generalisasi.
+
+Setelah tuning, model CatBoost dilatih kembali menggunakan kombinasi parameter terbaik (`best_params`). Evaluasi akhir dilakukan dengan membandingkan hasil prediksi pada data uji (X_test) terhadap nilai aktual (y_test).
 
 ## ⚙️ Evaluation
 
