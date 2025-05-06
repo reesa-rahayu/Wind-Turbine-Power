@@ -4,13 +4,13 @@
 
 ![Wine Turbine](https://www.solarfeeds.com/mag/wp-content/uploads/2019/10/picspree-1256331.jpg)
 
-Energi terbarukan, khususnya dari kincir angin, memainkan peran penting dalam transisi menuju sumber energi berkelanjutan [1](https://www.tandfonline.com/doi/abs/10.1016/j.clipol.2003.10.010). Dengan semakin meningkatnya kebutuhan energi dan kekhawatiran tentang perubahan iklim, penting untuk memanfaatkan teknologi yang ada untuk memprediksi dan mengoptimalkan hasil energi dari sumber ini.
+Energi terbarukan, khususnya dari kincir angin, memainkan peran penting dalam transisi menuju sumber energi berkelanjutan [[1]](https://www.tandfonline.com/doi/abs/10.1016/j.clipol.2003.10.010). Dengan semakin meningkatnya kebutuhan energi dan kekhawatiran tentang perubahan iklim, penting untuk memanfaatkan teknologi yang ada untuk memprediksi dan mengoptimalkan hasil energi dari sumber ini.
 
 Proyek ini bertujuan untuk menganalisis dan memprediksi energi yang dihasilkan oleh kincir angin menggunakan dataset yang berisi data SCADA (Supervisory Control and Data Acquisition) dari kincir angin di Turki pada tahun 2018.
 
 ### Mengapa dan Bagaimana Masalah Ini Dapat Dipecahkan
 
-Dalam konteks dunia yang semakin menuntut penggunaan energi bersih, pemahaman yang lebih baik tentang variabel-variabel yang mempengaruhi output energi kincir angin dapat memberikan wawasan yang berharga bagi operator dan pengembang proyek energi terbarukan. Dengan menggunakan algoritma _Machine Learning_, proyek ini dapat membantu dalam menghasilkan model yang lebih akurat untuk memprediksi produksi energi berdasarkan faktor-faktor seperti kecepatan angin, suhu, dan kondisi lingkungan lainnya [2](https://www.mdpi.com/1996-1073/14/1/125).
+Dalam konteks dunia yang semakin menuntut penggunaan energi bersih, pemahaman yang lebih baik tentang variabel-variabel yang mempengaruhi output energi kincir angin dapat memberikan wawasan yang berharga bagi operator dan pengembang proyek energi terbarukan. Dengan menggunakan algoritma _Machine Learning_, proyek ini dapat membantu dalam menghasilkan model yang lebih akurat untuk memprediksi produksi energi berdasarkan faktor-faktor seperti kecepatan angin, suhu, dan kondisi lingkungan lainnya [[2]](https://www.mdpi.com/1996-1073/14/1/125).
 
 ## Business Understanding
 
