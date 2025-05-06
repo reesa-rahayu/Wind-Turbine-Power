@@ -28,17 +28,20 @@ Dalam konteks dunia yang semakin menuntut penggunaan energi bersih, pemahaman ya
 
 ### Solution statements
 
-- Melakukan percobaan dengan menggunakan beberapa algoritma machine learning, termasuk ARIMA, RNN, LSTM, Bi-LSTM, dan GRU untuk membandingkan akurasi dan efektivitas masing-masing model dalam memprediksi energi yang dihasilkan berdasarkan data waktu yang tersedia. Pemilihan algoritma ini bertujuan untuk memanfaatkan kelebihan masing-masing dalam menangkap pola dalam dataset yang berskala waktu.
-- Melakukan eksplorasi data secara mendalam yang mencakup univariate analysis untuk memahami distribusi tiap fitur, multivariate analysis untuk mengidentifikasi interaksi antar fitur, serta correlation analysis untuk mengetahui hubungan yang signifikan antara fitur-fitur kunci seperti kecepatan angin, suhu, dan output daya. Proses ini bertujuan untuk mendapatkan wawasan yang lebih dalam mengenai faktor-faktor yang mempengaruhi keluaran energi serta untuk melakukan fitur rekayasa yang relevan.
-- Mengimplementasikan feature engineering untuk menghasilkan variabel baru dari data yang ada, seperti kecepatan angin rata-rata harian dan tren suhu, agar model dapat menangkap pola yang lebih kompleks dan efektif dalam memprediksi hasil energi.
-- Melakukan cross-validation untuk mengevaluasi kinerja model yang dikembangkan, guna memastikan bahwa model tidak hanya akurat pada data pelatihan tetapi juga memiliki kemampuan generalisasi yang baik pada data yang belum pernah dilihat sebelumnya.
-- Menerapkan hyperparameter tuning pada model yang terpilih menggunakan teknik seperti Grid Search, untuk mengoptimalkan parameter model sehingga dapat meningkatkan akurasi prediksi secara keseluruhan.
+- Membangun dan Membandingkan Beberapa Model Regresi untuk Prediksi Energi Kincir Angin
+  Dilakukan percobaan dengan berbagai algoritma regresi, termasuk Gradient Boosting, SVR, Random Forest, Extra Trees, AdaBoost, Decision Tree, XGBoost, dan CatBoost untuk memprediksi daya aktif (LV ActivePower). Masing-masing model diuji pada data yang telah dibersihkan dan dinormalisasi, kemudian dievaluasi menggunakan metrik regresi seperti R² Score, RMSE, MAE, dan MAPE. Tujuannya adalah untuk mengidentifikasi model baseline dengan performa terbaik yang mampu menangkap hubungan non-linear dan kompleks antar variabel seperti kecepatan angin, suhu, dan arah angin.
+- Melakukan exploratory data analysis (EDA) secara menyeluruh
+  Analisis yang dilakukan termasuk analisis univariat (histogram dan boxplot), analisis multivariat (pairplot dan heatmap), serta analisis hubungan antar fitur terhadap target seperti kecepatan angin terhadap daya aktif. Proses ini membantu dalam mengidentifikasi pola musiman, siang/malam, serta outlier yang dapat memengaruhi performa model.
+- Mengimplementasikan feature engineering
+  Dilakukan ekstraksi informasi penting dari data waktu seperti jam, hari, bulan, musim, serta menambahkan fitur siang/malam menggunakan data astronomis wilayah Izmir (lokasi turbin), serta menambahkan fitur suhu dari data cuaca eksternal. Ini memberikan konteks yang lebih kaya terhadap perilaku turbin dalam berbagai kondisi lingkungan.
+- Melakukan Hyperparameter Tuning untuk Meningkatkan Performa Model Terbaik
+  Setelah model baseline dengan performa terbaik ditemukan, dilakukan RandomizedSearchCV untuk mencari kombinasi parameter optimal. Proses ini menggunakan metrik RMSE sebagai skor utama, untuk memastikan peningkatan kinerja model secara objektif dan terukur terhadap data uji. Hasil tuning menunjukkan peningkatan skor prediktif, mengindikasikan model mampu melakukan generalisasi yang lebih baik.
 
 Dengan langkah-langkah ini, proyek bertujuan untuk mencapai efisiensi dan keakuratan tinggi dalam memprediksi energi yang dihasilkan oleh kincir angin, sehingga dapat memberikan informasi yang berguna untuk perencanaan dan manajemen sistem energi terbarukan.
 
 ## Data Understanding
 
-Dataset yang digunakan dalam proyek ini adalah [2018 SCADA Data of a Wind Turbine in Turkey](https://www.kaggle.com/datasets/berkerisen/wind-turbine-scada-dataset/data). Dataset ini berisi informasi operasional dari sebuah kincir angin selama periode tertentu, memperlihatkan berbagai variabel yang berkontribusi pada produksi energi. Data ini terukur pada interval waktu tertentu, mulai dari 1 Januari 2018 hingga 13 Desember 2018.
+Dataset yang digunakan dalam proyek ini adalah [2018 SCADA Data of a Wind Turbine in Turkey](https://www.kaggle.com/datasets/berkerisen/wind-turbine-scada-dataset/data). Dataset ini berisi informasi operasional dari sebuah kincir angin selama periode tertentu, memperlihatkan berbagai variabel yang berkontribusi pada produksi energi. Data ini terukur pada interval waktu tertentu, mulai dari 1 Januari 2018 hingga 13 Desember 2018. Terdiri atas
 
 ### Variabel-variabel pada Restaurant UCI dataset adalah sebagai berikut:
 
@@ -57,7 +60,8 @@ Dilakukan proses sebagai berikut:
 1.  Missing Data
 
     - Dilakukan pemeriksaan jumlah nilai yang hilang pada setiap kolom menggunakan `.isna().sum()`.
-    - Untuk kolom suhu (`Temperature (°C)`), nilai yang hilang sebelumnya telah diatasi menggunakan metode **interpolasi** saat proses feature engineering.
+    - Pada data asli sebelum feature engineering tidak terdapat nilai yang kosong.
+    - Untuk kolom suhu (`Temperature (°C)`) yang didapatkan dari proses feature engineering, nilai yang kosong diatasi menggunakan metode **interpolasi**.
 
 2.  Outlier Handling
     - Pada kolom `LV ActivePower (kW)` ditemukan nilai **negatif**, yang secara fisik tidak mungkin terjadi karena turbin tidak dapat menghasilkan daya negatif.
@@ -206,6 +210,105 @@ Data Preparation dilakukan untuk memastikan bahwa data yang digunakan dalam pemo
 ## 🤖 Modeling
 
 Pemodelan dilakukan untuk memprediksi daya listrik (`LV ActivePower (kW)`) yang dihasilkan turbin angin berdasarkan berbagai fitur seperti kecepatan angin, suhu, arah angin, dan lainnya. Beberapa model regresi digunakan untuk membandingkan performa dan memilih model terbaik.
+
+### ⚙️ Tahapan Pemodelan dan Parameter yang Digunakan
+
+Untuk memprediksi daya listrik (LV ActivePower (kW)) yang dihasilkan turbin angin, proses pemodelan dilakukan dengan pendekatan eksperimen komparatif terhadap 10 algoritma regresi populer. Tujuannya adalah mengidentifikasi model dengan performa terbaik berdasarkan data fitur yang tersedia seperti kecepatan angin, suhu, dan parameter operasional lainnya.
+
+✅ Langkah-Langkah Pemodelan
+
+1. Inisialisasi Model
+   Dilakukan inisiasi baseline model dengan parameter awal sama yaitu `random_state=42`. Sepuluh model regresi dari berbagai kategori (linear, pohon keputusan, ensemble, dan boosting) digunakan:
+
+```python
+models = [
+  GradientBoostingRegressor(random_state=42),
+  SVR(),
+  RandomForestRegressor(random_state=42),
+  LinearRegression(),
+  ExtraTreesRegressor(random_state=42),
+  AdaBoostRegressor(random_state=42),
+  DecisionTreeRegressor(random_state=42),
+  XGBRegressor(random_state=42),
+  XGBRFRegressor(random_state=42),
+  CatBoostRegressor(random_state=42)
+]
+```
+
+2. Training dan Evaluasi
+   Setiap model dilatih menggunakan data pelatihan (X_train, y_train) dan diuji terhadap data pengujian (X_test, y_test). Hasil evaluasi disimpan dalam daftar.
+
+   🧪 **Hasil Training Model**
+
+Setelah proses pelatihan dan evaluasi dilakukan terhadap berbagai algoritma regresi, berikut adalah perbandingan performa masing-masing model berdasarkan empat metrik evaluasi:
+
+| Model                   | R² Score | RMSE   | MAE    | MAPE        |
+| ----------------------- | -------- | ------ | ------ | ----------- |
+| **CatBoost Regressor**  | 0.9847   | 161.73 | 71.92  | 7.20 × 10¹⁶ |
+| **XGBoost Regressor**   | 0.9833   | 168.73 | 72.44  | 7.05 × 10¹⁶ |
+| ExtraTrees Regressor    | 0.9782   | 192.76 | 69.95  | 7.04 × 10¹⁶ |
+| Random Forest Regressor | 0.9754   | 204.84 | 73.30  | 7.66 × 10¹⁶ |
+| Decision Tree Regressor | 0.9569   | 271.19 | 88.62  | 5.87 × 10¹⁶ |
+| Gradient Boosting Regr. | 0.9519   | 286.55 | 127.70 | 1.54 × 10¹⁷ |
+| XGBRF Regressor         | 0.9464   | 302.54 | 123.74 | 1.48 × 10¹⁷ |
+| Linear Regression       | 0.9059   | 400.72 | 207.78 | 3.00 × 10¹⁷ |
+| SVR                     | 0.8951   | 423.00 | 165.70 | 2.37 × 10¹⁷ |
+| AdaBoost Regressor      | 0.8857   | 441.57 | 273.10 | 2.00 × 10   |
+
+🔍 **Interpretasi Hasil**:
+
+- **CatBoost Regressor** dan **XGBoost Regressor** menunjukkan performa terbaik dengan nilai R² mendekati 1, menunjukkan bahwa model mampu menjelaskan hampir seluruh variansi data target.
+- **ExtraTrees** dan **RandomForest** juga tampil cukup kuat, meskipun sedikit di bawah dua model boosting tersebut.
+- Model seperti **AdaBoost**, **Linear Regression**, dan **SVR** memiliki performa paling rendah, menunjukkan bahwa mereka kurang cocok untuk data yang kompleks seperti dalam kasus turbin angin ini.
+- Nilai **MAPE** yang sangat besar secara absolut menunjukkan bahwa skala target variabel cukup besar atau terdapat nilai mendekati nol yang memperbesar error relatif (perlu pengecekan lebih lanjut jika MAPE akan digunakan untuk keputusan akhir).
+
+3. Pemilihan Model Terbaik ✅
+   Berdasarkan evaluasi, **CatBoost Regressor** dipilih sebagai model terbaik karena menghasilkan prediksi paling akurat (R² tertinggi dan RMSE/MAE terendah). Selain itu, model ini juga mampu menangani kompleksitas dan non-linearitas data dengan sangat baik tanpa perlu banyak preprocessing.
+
+4. 🛠️ Fine Tuning Model
+   Berdasarkan hasil evaluasi awal, model **CatBoost Regressor** menunjukkan performa terbaik dalam memprediksi daya listrik yang dihasilkan oleh turbin angin. Untuk lebih mengoptimalkan kinerjanya, dilakukan proses fine-tuning terhadap hyperparameter model.
+
+Tujuan utama fine tuning adalah untuk mencari kombinasi parameter terbaik yang meminimalkan error prediksi. Proses ini dilakukan menggunakan **RandomizedSearchCV** dari scikit-learn dengan metrik evaluasi berupa **Root Mean Squared Error (RMSE)**.
+
+🧪 **Hyperparameter yang Diuji**
+
+- `learning_rate`: Tingkat pembelajaran untuk proses boosting.
+- `iterations`: Jumlah pohon yang dibangun (estimators).
+- `depth`: Kedalaman maksimum dari setiap pohon.
+- `subsample`: Proporsi data yang digunakan untuk setiap pohon.
+- `colsample_bylevel`: Proporsi fitur yang digunakan di setiap level pohon.
+- `l2_leaf_reg`: Regularisasi L2 untuk mengurangi overfitting.
+- `min_child_samples`: Minimum jumlah sampel di simpul daun.
+
+🔍 **Proses dan Hasil Tuning**
+
+Tuning dilakukan dengan:
+
+- `n_iter = 50` kombinasi parameter acak.
+- `cv = 5` cross-validation untuk menjaga generalisasi.
+
+Setelah tuning, model CatBoost dilatih kembali menggunakan kombinasi parameter terbaik (`best_params`). Evaluasi akhir dilakukan dengan membandingkan hasil prediksi pada data uji (X_test) terhadap nilai aktual (y_test).
+
+✅ Hasil Evaluasi Akhir
+
+| Metrik   | Nilai                 |
+| -------- | --------------------- |
+| R² Score | 0.9881578176597767    |
+| RMSE     | 142.14934648611487    |
+| MAE      | 59.72447828787168     |
+| MAPE     | 5.304711773256123e+16 |
+
+5. 📊 Visualisasi Prediksi
+
+Grafik berikut menunjukkan perbandingan antara:
+
+- Daya aktual yang dihasilkan (`LV ActivePower`)
+- Prediksi model (`Predictions`)
+- Daya teoretis (`Theoretical_Power_Curve`)
+
+Daya aktual dan prediksi menunjukkan kecocokan yang sangat baik terhadap kecepatan angin, mendekati nilai daya teoretis, menandakan bahwa model bekerja secara realistis dan akurat.
+
+![Prediction Plot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/prediction_plot.png?raw=true)
 
 ### 📌 Model yang Digunakan
 
@@ -407,82 +510,6 @@ Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, e
    **Kekurangan**:
 
    - Hanya dapat digunakan dengan model regresi dan tidak memberikan informasi mengenai kekuatan hubungan antar variabel independen dan dependen.
-
-### 🧪 Hasil Training Model
-
-Setelah proses pelatihan dan evaluasi dilakukan terhadap berbagai algoritma regresi, berikut adalah perbandingan performa masing-masing model berdasarkan empat metrik evaluasi:
-
-| Model                   | R² Score | RMSE   | MAE    | MAPE        |
-| ----------------------- | -------- | ------ | ------ | ----------- |
-| **CatBoost Regressor**  | 0.9847   | 161.73 | 71.92  | 7.20 × 10¹⁶ |
-| **XGBoost Regressor**   | 0.9833   | 168.73 | 72.44  | 7.05 × 10¹⁶ |
-| ExtraTrees Regressor    | 0.9782   | 192.76 | 69.95  | 7.04 × 10¹⁶ |
-| Random Forest Regressor | 0.9754   | 204.84 | 73.30  | 7.66 × 10¹⁶ |
-| Decision Tree Regressor | 0.9569   | 271.19 | 88.62  | 5.87 × 10¹⁶ |
-| Gradient Boosting Regr. | 0.9519   | 286.55 | 127.70 | 1.54 × 10¹⁷ |
-| XGBRF Regressor         | 0.9464   | 302.54 | 123.74 | 1.48 × 10¹⁷ |
-| Linear Regression       | 0.9059   | 400.72 | 207.78 | 3.00 × 10¹⁷ |
-| SVR                     | 0.8951   | 423.00 | 165.70 | 2.37 × 10¹⁷ |
-| AdaBoost Regressor      | 0.8857   | 441.57 | 273.10 | 2.00 × 10   |
-
-### 🔍 Interpretasi Hasil:
-
-- **CatBoost Regressor** dan **XGBoost Regressor** menunjukkan performa terbaik dengan nilai R² mendekati 1, menunjukkan bahwa model mampu menjelaskan hampir seluruh variansi data target.
-- **ExtraTrees** dan **RandomForest** juga tampil cukup kuat, meskipun sedikit di bawah dua model boosting tersebut.
-- Model seperti **AdaBoost**, **Linear Regression**, dan **SVR** memiliki performa paling rendah, menunjukkan bahwa mereka kurang cocok untuk data yang kompleks seperti dalam kasus turbin angin ini.
-- Nilai **MAPE** yang sangat besar secara absolut menunjukkan bahwa skala target variabel cukup besar atau terdapat nilai mendekati nol yang memperbesar error relatif (perlu pengecekan lebih lanjut jika MAPE akan digunakan untuk keputusan akhir).
-
-### ✅ Kesimpulan:
-
-Berdasarkan evaluasi, **CatBoost Regressor** dipilih sebagai model terbaik karena menghasilkan prediksi paling akurat (R² tertinggi dan RMSE/MAE terendah). Selain itu, model ini juga mampu menangani kompleksitas dan non-linearitas data dengan sangat baik tanpa perlu banyak preprocessing.
-
-## 🛠️ Fine Tuning Model (CatBoost Regressor)
-
-Berdasarkan hasil evaluasi awal, model **CatBoost Regressor** menunjukkan performa terbaik dalam memprediksi daya listrik yang dihasilkan oleh turbin angin. Untuk lebih mengoptimalkan kinerjanya, dilakukan proses fine-tuning terhadap hyperparameter model.
-
-### 🎯 Tujuan Fine Tuning
-
-Tujuan utama fine tuning adalah untuk mencari kombinasi parameter terbaik yang meminimalkan error prediksi. Proses ini dilakukan menggunakan **RandomizedSearchCV** dari scikit-learn dengan metrik evaluasi berupa **Root Mean Squared Error (RMSE)**.
-
-### 🧪 Hyperparameter yang Diuji
-
-- `learning_rate`: Tingkat pembelajaran untuk proses boosting.
-- `iterations`: Jumlah pohon yang dibangun (estimators).
-- `depth`: Kedalaman maksimum dari setiap pohon.
-- `subsample`: Proporsi data yang digunakan untuk setiap pohon.
-- `colsample_bylevel`: Proporsi fitur yang digunakan di setiap level pohon.
-- `l2_leaf_reg`: Regularisasi L2 untuk mengurangi overfitting.
-- `min_child_samples`: Minimum jumlah sampel di simpul daun.
-
-### 🔍 Proses dan Hasil Tuning
-
-Tuning dilakukan dengan:
-
-- `n_iter = 50` kombinasi parameter acak.
-- `cv = 5` cross-validation untuk menjaga generalisasi.
-
-Setelah tuning, model CatBoost dilatih kembali menggunakan kombinasi parameter terbaik (`best_params`). Evaluasi akhir dilakukan dengan membandingkan hasil prediksi pada data uji (X_test) terhadap nilai aktual (y_test).
-
-### ✅ Hasil Evaluasi Akhir
-
-| Metrik   | Nilai                 |
-| -------- | --------------------- |
-| R² Score | 0.9881578176597767    |
-| RMSE     | 142.14934648611487    |
-| MAE      | 59.72447828787168     |
-| MAPE     | 5.304711773256123e+16 |
-
-### 📊 Visualisasi Prediksi
-
-Grafik berikut menunjukkan perbandingan antara:
-
-- Daya aktual yang dihasilkan (`LV ActivePower`)
-- Prediksi model (`Predictions`)
-- Daya teoretis (`Theoretical_Power_Curve`)
-
-Daya aktual dan prediksi menunjukkan kecocokan yang sangat baik terhadap kecepatan angin, mendekati nilai daya teoretis, menandakan bahwa model bekerja secara realistis dan akurat.
-
-![Prediction Plot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/prediction_plot.png?raw=true)
 
 ## Referensi
 
