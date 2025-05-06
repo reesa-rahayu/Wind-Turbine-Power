@@ -321,9 +321,7 @@ Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, e
 
    Rumus:
 
-   $$
-   \text{MAE} = \frac{1}{n} \sum\_{i=1}^{n} |y_i - \hat{y_i}|
-   $$
+   ![MAE Equation](https://miro.medium.com/v2/resize:fit:822/1*-fLHZ0gOJg7nTuWVm_kIzw.png)
 
    Keterangan:
 
@@ -346,9 +344,7 @@ Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, e
 
    Rumus:
 
-   $$
-   \text{MAPE} = \frac{100\%}{n} \sum\_{i=1}^{n} \left|\frac{y_i - \hat{y_i}}{y_i}\right|
-   $$
+   ![MAPE Equation](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjHL76Vzl5SiPLX9dQm5KimXogVNpMc7KaAx4LMjRmQi1GVpHe8XG-0R55b2_z-Ozd76f5lSaFRe6CyuxWTNqHwwetfdWbSpKI_kpL_tsvnE9xGA5-QO0iwGAMsrGdSVUaV7xJYjcd04FtM/s433/mape.jpg)
 
    Keterangan:
 
@@ -371,9 +367,7 @@ Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, e
 
    Rumus:
 
-   $$
-   \text{RMSE} = \sqrt{\frac{1}{n} \sum\_{i=1}^{n} (y_i - \hat{y_i})^2}
-   $$
+   ![RSME Equation](https://arize.com/wp-content/uploads/2023/08/RMSE-equation.png)
 
    Keterangan:
 
@@ -396,9 +390,7 @@ Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, e
 
    Rumus:
 
-   $$
-   R^2 = 1 - \frac{\sum*{i=1}^{n} (y_i - \hat{y_i})^2}{\sum*{i=1}^{n} (y_i - \bar{y})^2}
-   $$
+   ![R2 Equation](https://vitalflux.com/wp-content/uploads/2019/07/R-squared-formula-function-of-SSE-and-SST.jpg)
 
    Keterangan:
 
