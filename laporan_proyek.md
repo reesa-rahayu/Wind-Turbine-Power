@@ -49,89 +49,123 @@ Dataset yang digunakan dalam proyek ini adalah [2018 SCADA Data of a Wind Turbin
 - Theoretical_Power_Curve (KWh): Prediksi energi yang dihasilkan turbin secara teoritis.
 
 ### Tahapan Exploratory Data Analysis (EDA):
-Dilakukan proses sebagai berikut:
-#### 🧹 Data Cleaning
-   1. Missing Data
-      - Dilakukan pemeriksaan jumlah nilai yang hilang pada setiap kolom menggunakan `.isna().sum()`.
-      - Untuk kolom suhu (`Temperature (°C)`), nilai yang hilang sebelumnya telah diatasi menggunakan metode **interpolasi** saat proses feature engineering.
 
-   2. Outlier Handling
-      - Pada kolom `LV ActivePower (kW)` ditemukan nilai **negatif**, yang secara fisik tidak mungkin terjadi karena turbin tidak dapat menghasilkan daya negatif.
-      - Jumlah data anomali dihitung, kemudian semua nilai negatif diganti menjadi **0** menggunakan fungsi `.apply()`.
-      - Langkah ini penting untuk menjaga validitas data dan mencegah model belajar dari informasi yang salah.
+Dilakukan proses sebagai berikut:
+
+#### 🧹 Data Cleaning
+
+1.  Missing Data
+
+    - Dilakukan pemeriksaan jumlah nilai yang hilang pada setiap kolom menggunakan `.isna().sum()`.
+    - Untuk kolom suhu (`Temperature (°C)`), nilai yang hilang sebelumnya telah diatasi menggunakan metode **interpolasi** saat proses feature engineering.
+
+2.  Outlier Handling
+    - Pada kolom `LV ActivePower (kW)` ditemukan nilai **negatif**, yang secara fisik tidak mungkin terjadi karena turbin tidak dapat menghasilkan daya negatif.
+    - Jumlah data anomali dihitung, kemudian semua nilai negatif diganti menjadi **0** menggunakan fungsi `.apply()`.
+    - Langkah ini penting untuk menjaga validitas data dan mencegah model belajar dari informasi yang salah.
 
 #### 🔧 **Feature Engineering**
-   Tahapan ini dilakukan untuk memperkaya dataset dengan fitur-fitur tambahan yang relevan, guna meningkatkan kualitas model prediksi energi angin.
 
-   1. **Ekstraksi Waktu**
-      - Menambahkan kolom:
-      - `Hour`: Jam ke berapa (0–23)
-      - `Day`: Hari dalam bulan
-      - `Week`: Minggu ke berapa dalam tahun
-      - `Month`: Bulan ke berapa
-      - Bertujuan menangkap pola harian dan musiman dalam data.
+Tahapan ini dilakukan untuk memperkaya dataset dengan fitur-fitur tambahan yang relevan, guna meningkatkan kualitas model prediksi energi angin.
 
-   2. **Identifikasi Musim (Season)**
-      - Menentukan musim berdasarkan nilai `Month`:
-      - 1 = Winter (Des–Feb)
-      - 2 = Spring (Mar–Mei)
-      - 3 = Summer (Jun–Agu)
-      - 4 = Autumn (Sep–Nov)
-      - Fitur ini membantu memahami dampak perubahan musim terhadap kecepatan angin.
+1.  **Ekstraksi Waktu**
 
-   3. **Penentuan Siang/Malam (Day/Night)**
-      - Menggunakan library **Astral** untuk menghitung waktu matahari terbit dan terbenam di kota Izmir, Turki.
-      - Menambahkan kolom `Day/Night`:
-      - 0 = Siang
-      - 1 = Malam
-      - Bertujuan membedakan perilaku angin antara siang dan malam hari.
+    - Menambahkan kolom:
+    - `Hour`: Jam ke berapa (0–23)
+    - `Day`: Hari dalam bulan
+    - `Week`: Minggu ke berapa dalam tahun
+    - `Month`: Bulan ke berapa
+    - Bertujuan menangkap pola harian dan musiman dalam data.
 
-   4. **Suhu Udara (Temperature)**
-      - Data suhu diperoleh dari **Meteostat API** berdasarkan lokasi dan waktu.
-      - Disesuaikan ke interval 10 menit agar sinkron dengan data utama.
-      - Fitur `Temperature (°C)` ditambahkan dan nilai yang hilang diisi menggunakan interpolasi.
-      - Suhu digunakan karena berpengaruh terhadap densitas udara yang berperan dalam rumus energi kinetik angin.
+2.  **Identifikasi Musim (Season)**
+
+    - Menentukan musim berdasarkan nilai `Month`:
+    - 1 = Winter (Des–Feb)
+    - 2 = Spring (Mar–Mei)
+    - 3 = Summer (Jun–Agu)
+    - 4 = Autumn (Sep–Nov)
+    - Fitur ini membantu memahami dampak perubahan musim terhadap kecepatan angin.
+
+3.  **Penentuan Siang/Malam (Day/Night)**
+
+    - Menggunakan library **Astral** untuk menghitung waktu matahari terbit dan terbenam di kota Izmir, Turki.
+    - Menambahkan kolom `Day/Night`:
+    - 0 = Siang
+    - 1 = Malam
+    - Bertujuan membedakan perilaku angin antara siang dan malam hari.
+
+4.  **Suhu Udara (Temperature)**
+    - Data suhu diperoleh dari **Meteostat API** berdasarkan lokasi dan waktu.
+    - Disesuaikan ke interval 10 menit agar sinkron dengan data utama.
+    - Fitur `Temperature (°C)` ditambahkan dan nilai yang hilang diisi menggunakan interpolasi.
+    - Suhu digunakan karena berpengaruh terhadap densitas udara yang berperan dalam rumus energi kinetik angin.
 
 #### 📊 Data Analysis & Visualisasi
 
 Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan antar fitur dalam dataset.
 
-   1. Analisis Distribusi dan Korelasi
-      - Visualisasi awal menggunakan **Pairplot** dan **Histogram** menunjukkan sebaran dan korelasi antara:
-         - `LV ActivePower (kW)`
-         - `Wind Speed (m/s)`
-         - `Theoretical_Power_Curve (KWh)`
-         - `Wind Direction (°)`
-         - `Temperature (°C)`
-      - **Boxplot** digunakan untuk mengidentifikasi outlier, terutama pada kolom `Wind Speed (m/s)`.
+1.  Analisis Distribusi dan Korelasi
 
-   2. Pola Data terhadap Waktu
-      - Plot garis menunjukkan pola fluktuasi fitur terhadap waktu.
-      - Memberikan wawasan tentang musim, harian, dan perbedaan waktu (siang vs malam) dalam produksi energi.
+    - Visualisasi awal menggunakan **Pairplot** dan **Histogram** menunjukkan sebaran dan korelasi antara:
 
-   3. Distribusi Energi
-      - **Siang vs Malam**: Malam hari menghasilkan energi lebih banyak secara akumulatif.
-      - **Bulanan**: Produksi energi tertinggi terjadi di bulan **Maret** dan **Agustus**.
-      - **Musiman**: Energi paling banyak dihasilkan saat **musim gugur (Autumn)**.
+      - `LV ActivePower (kW)`
+      - `Wind Speed (m/s)`
+      - `Theoretical_Power_Curve (KWh)`
+      - `Wind Direction (°)`
+      - `Temperature (°C)`
 
-   4. Analisis Kecepatan Angin
-      - Hubungan antara `Wind Speed (m/s)` dan:
+        ![Pairplot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/pairplot_observed_column.png?raw=true)
+
+        ![Histogram](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/histogram_observes_column.png?raw=true)
+
+    - **Boxplot** digunakan untuk mengidentifikasi outlier, terutama pada kolom `Wind Speed (m/s)`.
+
+2.  Pola Data terhadap Waktu
+
+    - Plot garis menunjukkan pola fluktuasi fitur terhadap waktu.
+    - Memberikan wawasan tentang musim, harian, dan perbedaan waktu (siang vs malam) dalam produksi energi.
+
+3.  Distribusi Energi
+
+    - **Siang vs Malam**: Malam hari menghasilkan energi lebih banyak secara akumulatif.
+    - **Bulanan**: Produksi energi tertinggi terjadi di bulan **Maret** dan **Agustus**.
+    - **Musiman**: Energi paling banyak dihasilkan saat **musim gugur (Autumn)**.
+      ![Day/Night Accumulation](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/accumulation_1.png?raw=true)
+      ![Month Accumulation](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/accumulation_2.png?raw=true)
+      ![Season Accumulation](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/accumulation_3.png?raw=true)
+
+4.  Analisis Kecepatan Angin
+
+    - Hubungan antara `Wind Speed (m/s)` dan:
       - **Theoretical Power** menunjukkan kurva daya ideal turbin.
+        
+        ![Wind Speed and Theoretical Power](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/power_1.png?raw=true)
       - **LV ActivePower** menunjukkan performa aktual.
-      - Ditemukan:
+        
+        ![Wind Speed and Actual Power](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/power_2.png?raw=true)
+    - Ditemukan:
       - Kecepatan minimum untuk menghasilkan daya ≈ **3.6 m/s**
       - Kecepatan minimum untuk mencapai daya maksimum ≈ **13.8 m/s**
 
-   5. Analisis Arah Angin
-      - Arah angin tersebar di semua sudut (0–360°), menunjukkan cakupan penuh oleh turbin.
-      - Arah angin paling optimal dalam menghasilkan energi adalah sekitar:
-      - **30–75°** dan **180–210°**
-      - Arah angin ini juga berkorelasi dengan kecepatan angin yang tinggi.
+5.  Analisis Arah Angin
 
-   6. Korelasi Antar Fitur (Heatmap)
-      - Korelasi kuat ditemukan antara `Wind Speed` dan `Theoretical_Power_Curve`, serta `Wind Speed` dengan `LV ActivePower`.
-      - Visualisasi ini menegaskan bahwa kecepatan angin adalah fitur paling penting untuk prediksi daya yang dihasilkan.
+    - Arah angin tersebar di semua sudut (0–360°), menunjukkan cakupan penuh oleh turbin.
+      
+      ![Wind Direction Accumulation](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/wind_direction.png?raw=true)
 
+    - Arah angin paling optimal dalam menghasilkan energi adalah sekitar: **30–75°** dan **180–210°**
+      
+      ![Wind direction and Power](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/wind_direction_1.png?raw=true)
+
+    - Arah angin ini juga berkorelasi dengan kecepatan angin yang tinggi.
+      
+      ![Wind direction and Wind Speed](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/wind_direction_2.png?raw=true)
+
+6.  Korelasi Antar Fitur (Heatmap)
+    ![Heatmap](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/heatmap.png?raw=true)
+
+    - Korelasi kuat ditemukan antara `Wind Speed` dan `Theoretical_Power_Curve`, serta `Wind Speed` dengan `LV ActivePower`.
+    - Visualisasi ini menegaskan bahwa kecepatan angin adalah fitur paling penting untuk prediksi daya yang dihasilkan.
 
 ## Data Preparation
 
