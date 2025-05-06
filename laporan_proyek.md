@@ -137,12 +137,15 @@ Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan ant
 4.  Analisis Kecepatan Angin
 
     - Hubungan antara `Wind Speed (m/s)` dan:
+
       - **Theoretical Power** menunjukkan kurva daya ideal turbin.
-        
+
         ![Wind Speed and Theoretical Power](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/power_1.png?raw=true)
+
       - **LV ActivePower** menunjukkan performa aktual.
-        
+
         ![Wind Speed and Actual Power](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/power_2.png?raw=true)
+
     - Ditemukan:
       - Kecepatan minimum untuk menghasilkan daya ≈ **3.6 m/s**
       - Kecepatan minimum untuk mencapai daya maksimum ≈ **13.8 m/s**
@@ -150,15 +153,15 @@ Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan ant
 5.  Analisis Arah Angin
 
     - Arah angin tersebar di semua sudut (0–360°), menunjukkan cakupan penuh oleh turbin.
-      
+
       ![Wind Direction Accumulation](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/wind_direction.png?raw=true)
 
     - Arah angin paling optimal dalam menghasilkan energi adalah sekitar: **30–75°** dan **180–210°**
-      
+
       ![Wind direction and Power](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/wind_direction_1.png?raw=true)
 
     - Arah angin ini juga berkorelasi dengan kecepatan angin yang tinggi.
-      
+
       ![Wind direction and Wind Speed](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/wind_direction_2.png?raw=true)
 
 6.  Korelasi Antar Fitur (Heatmap)
@@ -167,7 +170,7 @@ Analisis eksploratif dilakukan untuk memahami pola, distribusi, dan hubungan ant
     - Korelasi kuat ditemukan antara `Wind Speed` dan `Theoretical_Power_Curve`, serta `Wind Speed` dengan `LV ActivePower`.
     - Visualisasi ini menegaskan bahwa kecepatan angin adalah fitur paling penting untuk prediksi daya yang dihasilkan.
 
-## Data Preparation
+## 🛠️ Data Preparation
 
 Data Preparation dilakukan untuk memastikan bahwa data yang digunakan dalam pemodelan machine learning bersih, konsisten, dan siap untuk dianalisis. Proses ini penting untuk meningkatkan kinerja model dengan mengatasi masalah potensial dalam kualitas data.
 
@@ -177,92 +180,138 @@ Data Preparation dilakukan untuk memastikan bahwa data yang digunakan dalam pemo
    Masalah Skala Fitur: Beberapa fitur dalam dataset, seperti Wind Speed dan Temperature, memiliki skala yang sangat berbeda. Misalnya, kecepatan angin dapat berkisar antara 0 hingga 25 m/s, sementara suhu dapat berkisar antara 0 hingga 40 °C. Model yang sensitif terhadap skala fitur (seperti regresi linier atau jaringan saraf) dapat dipengaruhi jika fitur dengan skala yang lebih besar mendominasi proses pelatihan. Oleh karena itu, penting untuk menormalkan fitur numerik.
 
    **Langkah yang Diambil**:
-   Normalisasi dilakukan dengan metode **Min-Max Scaling** untuk fitur-fitur numerik dalam dataset. Proses ini mengubah nilai setiap fitur ke dalam rentang [0, 1] dengan menggunakan rumus:
+   Normalisasi dilakukan menggunakan **StandardScaler**, yaitu metode standardisasi yang mengubah distribusi setiap fitur menjadi memiliki nilai rata-rata 0 dan standar deviasi 1, menggunakan rumus:
 
    ```math
-   X' = \frac{X - X_{min}}{X_{max} - X_{min}}
+   X' = \frac{X - \mu}{\sigma}
    ```
 
-   di mana $X$ adalah nilai asli, $X_{min}$ adalah nilai minimum dalam fitur, dan $X_{max}$ adalah nilai maksimum dalam fitur.
+   di mana $X$ adalah nilai asli, $\mu$ adalah rata-rata fitur, dan $\sigma$ adalah standar deviasi fitur.
 
    Alasan Penggunaan:
-   Normalisasi diperlukan untuk mengatasi masalah skala variabel yang berbeda, sehingga algoritma machine learning tidak bias terhadap variabel dengan nilai yang lebih besar. Dalam konteks ini, fitur seperti Wind Speed (kecepatan angin) dan Temperature (suhu) dapat memiliki rentang nilai yang jauh berbeda, dan algoritma yang sensitif terhadap skala fitur (seperti regresi atau jaringan saraf) mungkin memberikan bobot lebih pada fitur dengan nilai lebih tinggi. Dengan normalisasi, semua fitur berada dalam skala yang sama, membantu model beroperasi lebih efisien.
+   Standardisasi digunakan karena metode ini bekerja baik dengan algoritma yang mengasumsikan distribusi data normal atau sensitif terhadap skala, seperti Regresi Linier, SVM, dan Neural Networks. Dengan fitur berada pada skala yang seragam, model dapat mempelajari pola dengan lebih stabil dan efisien.
 
 2. **Splitting Data (Train-Test Split)**
 
-   Pemisahan data untuk pelatihan dan pengujian penting dilakukan untuk menghindari overfitting, di mana model hanya mengingat data pelatihan. Dataset dibagi menjadi 80% data pelatihan dan 20% data pengujian. Pemisahan ini memungkinkan penilaian kinerja model yang lebih akurat ketika dihadapkan pada data yang belum pernah dilihat sebelumnya. Pembagian ini bertujuan untuk mendapatkan gambaran yang jelas mengenai performa model dalam konteks dunia nyata.
+   Pemisahan data menjadi bagian pelatihan dan pengujian penting untuk mencegah overfitting, yaitu kondisi di mana model terlalu “hapal” data pelatihan dan gagal menggeneralisasi ke data baru.
 
-## Modeling
+   Langkah yang Diambil:
+   Dataset dibagi menjadi:
 
-Model machine learning yang digunakan dalam proyek ini adalah model prediksi, yang fokus pada memprediksi energi yang dihasilkan dari kincir angin berdasarkan fitur-fitur yang tersedia. Algoritma yang akan dieksplorasi meliputi:
+   - 80% untuk pelatihan `(X_train, y_train)`
+   - 20% untuk pengujian `(X_test, y_test)`
+     Proses ini dilakukan secara acak dengan `random_state=42` untuk memastikan hasil yang konsisten saat replikasi.
 
-1. **ARIMA** (Autoregressive Integrated Moving Average)
-   ARIMA adalah model statistika yang digunakan untuk analisis dan prediksi deret waktu. Model ini menggabungkan komponen autoregresif (AR), perbedaan (I) untuk membuat data stasioner, dan rata-rata bergerak (MA). ARIMA efektif dalam mengidentifikasi pola dalam data historis dan membuat prediksi berdasarkan pola tersebut.
+   Manfaat:
+   Dengan melakukan pemisahan ini, performa model dapat dievaluasi secara objektif terhadap data yang tidak pernah dilihat sebelumnya, memberikan gambaran lebih realistis tentang akurasi model di dunia nyata.
 
-   Kelebihan:
+## 🤖 Modeling
 
-   - Mampu menangkap pola temporal dalam data deret waktu.
-   - Sangat baik dalam memprediksi data yang memiliki tren atau musiman.
-   - Relatif mudah untuk diinterpretasikan dan diterapkan pada data yang stasioner.
+Pemodelan dilakukan untuk memprediksi daya listrik (`LV ActivePower (kW)`) yang dihasilkan turbin angin berdasarkan berbagai fitur seperti kecepatan angin, suhu, arah angin, dan lainnya. Beberapa model regresi digunakan untuk membandingkan performa dan memilih model terbaik.
 
-   Kekurangan:
+### 📌 Model yang Digunakan
 
-   - Membutuhkan data yang stasioner; jika data tidak stasioner, transformasi perlu dilakukan.
-   - Tidak selalu cocok untuk menangkap hubungan kompleks di antara banyak fitur.
+1. **Gradient Boosting Regressor**
+   Gradient Boosting adalah metode ensambel yang membangun model prediksi secara bertahap, di mana setiap model baru berusaha mengoreksi kesalahan dari model sebelumnya. Model ini menggabungkan banyak weak learners (biasanya decision tree) secara bertahap menggunakan gradient descent untuk meminimalkan loss function. Cocok untuk data kompleks yang tidak linear.
 
-2. **RNN**(Recurrent Neural Network)
-   RNN adalah jenis jaringan saraf yang dirancang untuk memproses urutan data dengan memanfaatkan memori dari langkah sebelumnya. Struktur RNN memudahkan model untuk mempertahankan informasi dari input sebelumnya dan menggunakannya untuk memprediksi output saat ini.
+   - ✅ Kelebihan:
+     - Mampu menangani non-linearitas dan fitur interaksi dengan baik
+     - Sering memberikan hasil akurat pada data kompleks
+   - ⚠️ Kekurangan:
+     - Waktu pelatihan lebih lama
+     - Rentan terhadap overfitting jika tidak dituning
 
-   Kelebihan:
+2. **Support Vector Regressor (SVR)**
+   SVR adalah versi regresi dari Support Vector Machine. SVR mencari fungsi (biasanya non-linear) yang dapat memprediksi nilai target dalam margin toleransi tertentu (epsilon). Tujuannya adalah menemukan hyperplane terbaik yang meminimalkan error sambil menjaga margin maksimum. SVR bekerja baik dengan data kecil atau berdimensi tinggi.
 
-   - Mampu mengolah data urutan atau sekuensial, sangat baik dalam menangkap dependensi temporal.
-   - Dapat belajar dari data yang lebih panjang tanpa perlu fitur rekayasa yang rumit.
+   - ✅ Kelebihan:
+     - Baik untuk data berukuran kecil dan linear/non-linear
+     - Robust terhadap outlier (dengan kernel dan parameter yang tepat)
+   - ⚠️ Kekurangan:
+     - Sulit dituning (C, epsilon, kernel)
+     - Tidak efisien untuk dataset besar
 
-   Kekurangan:
+3. **Random Forest Regressor**
+   Random Forest adalah metode ensambel berbasis decision tree. Model ini membangun banyak pohon keputusan pada subset data secara acak dan menggabungkan prediksinya dengan rata-rata. Teknik ini mengurangi overfitting yang sering terjadi pada decision tree tunggal dan meningkatkan akurasi serta stabilitas prediksi.
 
-   - Rentan terhadap masalah vanishing gradient, membuat pelatihan untuk urutan yang panjang menjadi sulit.
-   - Memerlukan waktu pelatihan yang lebih lama dibandingkan model tradisional.
+   - ✅ Kelebihan:
+     - Mengurangi overfitting dibandingkan Decision Tree tunggal
+     - Stabil dan bekerja baik dengan data yang noisy
+   - ⚠️ Kekurangan:
+     - Interpretabilitas rendah
+     - Lebih lambat dibanding model sederhana
 
-3. **LSTM** (Long Short-Term Memory)
-   LSTM adalah variasi dari RNN yang dirancang untuk mengatasi masalah _vanishing gradient_. LSTM menggunakan memori sel yang memungkinkan model menyimpan informasi untuk periode waktu yang lebih lama dan menjadikannya lebih bertahan terhadap perubahan dalam pola input.
+4. **Linear Regression**
+   Linear Regression adalah model statistik sederhana yang mengasumsikan hubungan linear antara fitur input dan target output. Model ini mencoba menemukan garis lurus terbaik (dalam ruang multi-dimensi) yang meminimalkan selisih kuadrat antara prediksi dan nilai aktual. Sering digunakan sebagai baseline karena interpretasinya yang mudah.
 
-   Kelebihan:
+   - ✅ Kelebihan:
+     - Cepat dan mudah diinterpretasikan
+     - Cocok sebagai baseline model
+   - ⚠️ Kekurangan:
+     - Tidak menangani non-linearitas
+     - Sensitif terhadap multikolinearitas dan outlier
 
-   - Khusus dirancang untuk mengatasi masalah pada RNN, mampu mengingat informasi lebih lama.
-   - Mampu memodelkan hubungan kompleks dalam data urutan, sehingga ideal untuk data time series.
+5. **Extra Trees Regressor** (Extremely Randomized Trees)
+   Extra Trees adalah varian dari Random Forest yang melakukan pemisahan (splitting) lebih acak pada tiap node decision tree. Berbeda dari Random Forest yang memilih split terbaik, Extra Trees memilih split secara acak dari subset kandidat. Pendekatan ini membuat model lebih cepat dan membantu mengurangi varians.
 
-   Kekurangan:
+   - ✅ Kelebihan:
+     - Lebih cepat dari Random Forest
+     - Mengurangi varians melalui randomisasi split
+   - ⚠️ Kekurangan:
+     - Interpretasi hasil rendah
+     - Bisa terlalu acak pada data yang kecil
 
-   - Lebih kompleks dan membutuhkan lebih banyak compute power daripada RNN konvensional.
-   - Memerlukan banyak data untuk pelatihan yang efektif.
+6. **AdaBoost Regressor**
+   AdaBoost (Adaptive Boosting) menggabungkan sejumlah model lemah (biasanya decision tree sederhana) secara bertahap. Setiap model fokus pada sampel yang salah diprediksi oleh model sebelumnya. Bobot pada data yang sulit diprediksi dinaikkan agar model selanjutnya lebih fokus padanya. Efektif untuk meningkatkan performa model sederhana.
 
-4. **Bi-LSTM** (Bidirectional Long Short-Term Memory)
-   Bi-LSTM merupakan pengembangan dari LSTM yang memungkinkan model untuk membaca data dari kedua arah (maju dan mundur). Ini memberikan konteks yang lebih baik dengan memanfaatkan informasi dari masa lalu dan masa depan.
+   - ✅ Kelebihan:
+     - Memperbaiki kesalahan model lemah secara iteratif
+     - Sederhana dan efektif
+   - ⚠️ Kekurangan:
+     - Rentan terhadap noise dan outlier
+     - Performa bisa turun pada data non-linear jika base learner terlalu lemah
 
-   Kelebihan:
+7. **Decision Tree Regressor**
+   Decision Tree membagi data ke dalam beberapa simpul berdasarkan nilai fitur tertentu, mengikuti prinsip if-else hingga mencapai prediksi numerik. Model ini mudah dipahami dan divisualisasikan. Namun, model ini cenderung overfit jika tidak diatur dengan baik (pruning, depth, dll.).
 
-   - Mampu menangkap lebih banyak informasi konteks dalam data urutan, meningkatkan akurasi prediksi.
-   - Lebih baik dalam menangani urutan yang memiliki informasi penting dari kedua arah waktu.
+   - ✅ Kelebihan:
+     - Mudah diinterpretasikan
+     - Menangani fitur numerik dan kategorikal tanpa normalisasi
+   - ⚠️ Kekurangan:
+     - Rentan terhadap overfitting
+     - Tidak stabil terhadap perubahan kecil dalam data
 
-   Kekurangan:
+8. **XGBoost Regressor**
+   XGBoost (Extreme Gradient Boosting) adalah implementasi efisien dan teroptimasi dari gradient boosting. Model ini dilengkapi dengan regularisasi L1 dan L2 untuk menghindari overfitting, serta mendukung paralelisasi dan kontrol penuh terhadap proses boosting. Sangat populer karena kecepatan dan akurasinya yang tinggi.
 
-   - Memerlukan lebih banyak sumber daya komputasi dan waktu pelatihan dibandingkan dengan model LSTM standar.
-   - Strukturnya yang lebih kompleks dapat membuat interpretasi model menjadi sulit.
+   - ✅ Kelebihan:
+     - Performa tinggi dan efisien
+     - Dilengkapi regularisasi untuk menghindari overfitting
+   - ⚠️ Kekurangan:
+     - Kompleksitas tuning parameter
+     - Konsumsi memori relatif tinggi
 
-5. **GRU** (Gated Recurrent Unit)
-   GRU adalah jenis RNN yang lebih sederhana dibandingkan LSTM tetapi tetap efektif dalam menangkap informasi temporal. GRU menggabungkan beberapa fungsi dalam satu gerbang, sehingga memiliki arsitektur yang lebih efisien.
+9. **XGBRF Regressor**
+   XGBRF adalah variasi dari XGBoost yang menggabungkan teknik random forest dengan boosting. Alih-alih memfokuskan pada kesalahan model sebelumnya, model ini membangun banyak pohon menggunakan subsampling acak terhadap fitur dan data. Cocok untuk menyeimbangkan akurasi dan stabilitas model.
 
-   Kelebihan:
+   - ✅ Kelebihan:
+     - Kombinasi akurasi XGBoost dengan prinsip Random Forest
+     - Baik untuk ensemble learning
+   - ⚠️ Kekurangan:
+     - Bisa lambat saat pelatihan
+     - Kompleksitas implementasi meningkat
 
-   - Memiliki lebih sedikit parameter daripada LSTM, sehingga lebih cepat dalam pelatihan dan memakan lebih sedikit memori.
-   - Efektif dalam menangkap pola temporal yang ada tanpa membutuhkan banyak lapisan.
+10. **CatBoost Regressor**
+    CatBoost adalah algoritma boosting dari Yandex yang dirancang untuk menangani data kategorikal dengan lebih efisien. Model ini secara otomatis menangani fitur kategorikal tanpa perlu encoding eksplisit dan menggunakan teknik ordered boosting untuk menghindari data leakage. Stabil dan sering memberikan hasil kompetitif tanpa banyak tuning.
 
-   Kekurangan:
+- ✅ Kelebihan:
+  - Performa tinggi, terutama untuk data kategorikal
+  - Sedikit tuning, stabil secara default
+- ⚠️ Kekurangan:
+  - Dokumentasi lebih terbatas dibanding XGBoost
+  - Proses pelatihan awal lebih lambat
 
-   - Meskipun lebih sederhana, performa GRU dapat sedikit lebih rendah dalam kasus-kasus tertentu dibandingkan dengan LSTM.
-   - Belum sepopuler LSTM, sehingga terdapat kurangnya pengetahuan dan teknik yang dioptimalkan untuk GRU.
-
-## Evaluation
+## ⚙️ Evaluation
 
 Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, evaluasi dilakukan untuk menilai kinerja model-model yang telah dibangun. Evaluasi ini menggunakan beberapa metrik yang penting untuk masalah regresi kontinu karena fokus kita adalah memprediksi output daya yang dihasilkan dari kincir angin.
 
@@ -369,37 +418,78 @@ Setelah melakukan pelatihan model menggunakan dataset yang sudah dipersiapkan, e
 
    - Hanya dapat digunakan dengan model regresi dan tidak memberikan informasi mengenai kekuatan hubungan antar variabel independen dan dependen.
 
-### Hasil Evaluasi:
+### 🧪 Hasil Training Model
 
-1. Logistic Regression:
-   - Akurasi: 0.90 (Test)
-   - Precision: 0.89 (Test)
-   - Recall: 0.85 (Test)
-   - F1-score: 0.80 (Test)
-   - ROC-AUC: 0.92 (Test)
-2. Decision Tree:
+Setelah proses pelatihan dan evaluasi dilakukan terhadap berbagai algoritma regresi, berikut adalah perbandingan performa masing-masing model berdasarkan empat metrik evaluasi:
 
-   - Akurasi: 1.0 (Test)
-   - Precision: 1.0 (Test)
-   - Recall: 1.0 (Test)
-   - F1-score: 1.0 (Test)
-   - ROC-AUC: 1.0 (Test)
+| Model                   | R² Score | RMSE   | MAE    | MAPE        |
+| ----------------------- | -------- | ------ | ------ | ----------- |
+| **CatBoost Regressor**  | 0.9847   | 161.73 | 71.92  | 7.20 × 10¹⁶ |
+| **XGBoost Regressor**   | 0.9833   | 168.73 | 72.44  | 7.05 × 10¹⁶ |
+| ExtraTrees Regressor    | 0.9782   | 192.76 | 69.95  | 7.04 × 10¹⁶ |
+| Random Forest Regressor | 0.9754   | 204.84 | 73.30  | 7.66 × 10¹⁶ |
+| Decision Tree Regressor | 0.9569   | 271.19 | 88.62  | 5.87 × 10¹⁶ |
+| Gradient Boosting Regr. | 0.9519   | 286.55 | 127.70 | 1.54 × 10¹⁷ |
+| XGBRF Regressor         | 0.9464   | 302.54 | 123.74 | 1.48 × 10¹⁷ |
+| Linear Regression       | 0.9059   | 400.72 | 207.78 | 3.00 × 10¹⁷ |
+| SVR                     | 0.8951   | 423.00 | 165.70 | 2.37 × 10¹⁷ |
+| AdaBoost Regressor      | 0.8857   | 441.57 | 273.10 | 2.00 × 10   |
 
-3. Random Forest:
+### 🔍 Interpretasi Hasil:
 
-   - Akurasi: 1.0 (Test)
-   - Precision: 1.0 (Test)
-   - Recall: 1.0 (Test)
-   - F1-score: 1.0 (Test)
-   - ROC-AUC: 1.0 (Test)
+- **CatBoost Regressor** dan **XGBoost Regressor** menunjukkan performa terbaik dengan nilai R² mendekati 1, menunjukkan bahwa model mampu menjelaskan hampir seluruh variansi data target.
+- **ExtraTrees** dan **RandomForest** juga tampil cukup kuat, meskipun sedikit di bawah dua model boosting tersebut.
+- Model seperti **AdaBoost**, **Linear Regression**, dan **SVR** memiliki performa paling rendah, menunjukkan bahwa mereka kurang cocok untuk data yang kompleks seperti dalam kasus turbin angin ini.
+- Nilai **MAPE** yang sangat besar secara absolut menunjukkan bahwa skala target variabel cukup besar atau terdapat nilai mendekati nol yang memperbesar error relatif (perlu pengecekan lebih lanjut jika MAPE akan digunakan untuk keputusan akhir).
 
-4. XGBoost:
-   - Akurasi: 1.0 (Test)
-   - Precision: 1.0 (Test)
-   - Recall: 1.0 (Test)
-   - F1-score: 1.0 (Test)
-   - ROC-AUC: 1.0 (Test)
+### ✅ Kesimpulan:
 
-Berdasarkan hasil evaluasi, model **XGBoost** memberikan hasil terbaik dengan 100% di semua metrik (Akurasi, Precision, Recall, F1-Score, dan ROC AUC). Oleh karena itu, XGBoost dipilih sebagai model terbaik untuk digunakan dalam mengidentifikasi PCOS. Keunggulannya dalam menangani data yang kompleks dan tidak seimbang menjadikannya pilihan yang tepat, terutama di bidang medis yang memerlukan akurasi tinggi dan kemampuan untuk menggeneralisasi.
+Berdasarkan evaluasi, **CatBoost Regressor** dipilih sebagai model terbaik karena menghasilkan prediksi paling akurat (R² tertinggi dan RMSE/MAE terendah). Selain itu, model ini juga mampu menangani kompleksitas dan non-linearitas data dengan sangat baik tanpa perlu banyak preprocessing.
 
-Namun, perlu diwaspadai potensi overfitting pada model ini.
+## 🛠️ Fine Tuning Model (CatBoost Regressor)
+
+Berdasarkan hasil evaluasi awal, model **CatBoost Regressor** menunjukkan performa terbaik dalam memprediksi daya listrik yang dihasilkan oleh turbin angin. Untuk lebih mengoptimalkan kinerjanya, dilakukan proses fine-tuning terhadap hyperparameter model.
+
+### 🎯 Tujuan Fine Tuning
+
+Tujuan utama fine tuning adalah untuk mencari kombinasi parameter terbaik yang meminimalkan error prediksi. Proses ini dilakukan menggunakan **RandomizedSearchCV** dari scikit-learn dengan metrik evaluasi berupa **Root Mean Squared Error (RMSE)**.
+
+### 🧪 Hyperparameter yang Diuji
+
+- `learning_rate`: Tingkat pembelajaran untuk proses boosting.
+- `iterations`: Jumlah pohon yang dibangun (estimators).
+- `depth`: Kedalaman maksimum dari setiap pohon.
+- `subsample`: Proporsi data yang digunakan untuk setiap pohon.
+- `colsample_bylevel`: Proporsi fitur yang digunakan di setiap level pohon.
+- `l2_leaf_reg`: Regularisasi L2 untuk mengurangi overfitting.
+- `min_child_samples`: Minimum jumlah sampel di simpul daun.
+
+### 🔍 Proses dan Hasil Tuning
+
+Tuning dilakukan dengan:
+
+- `n_iter = 50` kombinasi parameter acak.
+- `cv = 5` cross-validation untuk menjaga generalisasi.
+
+Setelah tuning, model CatBoost dilatih kembali menggunakan kombinasi parameter terbaik (`best_params`). Evaluasi akhir dilakukan dengan membandingkan hasil prediksi pada data uji (X_test) terhadap nilai aktual (y_test).
+
+### ✅ Hasil Evaluasi Akhir
+
+| Metrik   | Nilai                 |
+| -------- | --------------------- |
+| R² Score | 0.9881578176597767    |
+| RMSE     | 142.14934648611487    |
+| MAE      | 59.72447828787168     |
+| MAPE     | 5.304711773256123e+16 |
+
+### 📊 Visualisasi Prediksi
+
+Grafik berikut menunjukkan perbandingan antara:
+
+- Daya aktual yang dihasilkan (`LV ActivePower`)
+- Prediksi model (`Predictions`)
+- Daya teoretis (`Theoretical_Power_Curve`)
+
+Daya aktual dan prediksi menunjukkan kecocokan yang sangat baik terhadap kecepatan angin, mendekati nilai daya teoretis, menandakan bahwa model bekerja secara realistis dan akurat.
+
+![Prediction Plot](https://github.com/reesa-rahayu/Wind-Turbine-Power/blob/main/images/prediction_plot.png?raw=true)
